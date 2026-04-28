@@ -1242,7 +1242,7 @@ const P1_FIELDS = [
 // ─── GOOGLE SHEETS CONFIG ──────────────────────────────────────────────────────
 const GS_API_KEY   = '';
 const GS_SHEET_ID  = '';
-const GS_SCRIPT_URL = '';
+const GS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzx-0ZR415njVuSICiXMl_zHyXsASlV3l7n9cQPorUC6SSRVAqFcLXfGccVmi-1tw/exec';
 const GS_RANGE     = 'Feuille1!A1:A1';   // on stocke tout en JSON dans une seule cellule
 const GS_BASE      = 'https://sheets.googleapis.com/v4/spreadsheets';
 let   gsSyncTimer  = null;
@@ -1263,7 +1263,7 @@ function setSyncStatus(s, msg) {
 async function gsLoad() {
   setSyncStatus('loading', 'Chargement…');
   try {
-    const url = `${GS_SCRIPT_URL}?action=read`;
+    const url = `${GS_SCRIPT_URL}?action=load`;
     const res = await fetch(url, { mode: 'cors' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
@@ -1272,9 +1272,11 @@ async function gsLoad() {
       return false;
     }
     const parsed = JSON.parse(text);
-    if (parsed && parsed.dossiers) {
-      state.dossiers = parsed.dossiers;
-      state.nextId   = parsed.nextId || 1;
+    const dataObj = parsed.data || parsed; // support both formats
+    if (dataObj && dataObj.dossiers) {
+      state.dossiers   = dataObj.dossiers;
+      state.nextId     = dataObj.nextId || 1;
+      state.apporteurs = dataObj.apporteurs || state.apporteurs || [];
       setSyncStatus('saved', 'Synchronisé');
       return true;
     }
@@ -1315,16 +1317,16 @@ async function gsWrite(payload) {
       setSyncStatus('saving', 'Sauvegarde…');
       await fetch(scriptUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: payload,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save', data: JSON.parse(payload) }),
         mode: 'no-cors',
       });
-      setSyncStatus('saved', 'Synchronisé');
+      setSyncStatus('saved', 'Synchronisé ✅');
     } catch(e) {
       setSyncStatus('error', 'Erreur sync');
     }
   } else {
-    setSyncStatus('saved', 'Local uniquement');
+    setSyncStatus('idle', 'Local uniquement');
   }
 }
 
