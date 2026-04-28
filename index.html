@@ -958,13 +958,37 @@ function doGet(e) {
       <span class="modal-title" id="relance-modal-title">Enregistrer une relance</span>
       <button class="modal-close" onclick="closeModal('modal-relance')">×</button>
     </div>
-    <div class="modal-body">
+        <div class="modal-body">
       <div class="form-group full">
         <label>Note / compte-rendu de la relance</label>
-        <textarea id="relance-note" placeholder="Ex: Appelé conseiller – en attente accord comité crédit prévu jeudi..." style="min-height:100px"></textarea>
+        <textarea id="relance-note" placeholder="Ex: Appelé conseiller – en attente accord comité crédit prévu jeudi..." style="min-height:90px"></textarea>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:10px;background:var(--surface2)">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">✨ Générer un message SMS ou Email par IA</div>
+        <div class="form-group" style="margin-bottom:8px">
+          <label>Type de message</label>
+          <select id="relance-ia-type" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+            <option value="sms">💬 SMS (court et sympa)</option>
+            <option value="email">📧 Email (professionnel)</option>
+            <option value="formel">📧 Email (formel)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:8px">
+          <label>Contexte / Ce que tu veux dire</label>
+          <textarea id="relance-ia-contexte" placeholder="Ex: Rappeler Louise pour RDV banque demain 17h, lui demander d'apporter ses dernières fiches de paie..." style="min-height:70px;width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical"></textarea>
+        </div>
+        <button onclick="genererMessageIA()" style="width:100%;padding:9px;border-radius:7px;border:none;background:var(--p2);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✨ Générer le message</button>
+        <div id="ia-result" style="display:none;margin-top:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:4px">Message généré :</div>
+          <textarea id="ia-message" style="width:100%;min-height:100px;padding:8px 10px;border:1px solid var(--p2-light);border-radius:6px;background:var(--p2-bg);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical"></textarea>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button onclick="copierMessageIA()" style="flex:1;padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif">📋 Copier</button>
+            <button onclick="utiliserMessageIA()" style="flex:1;padding:7px;border-radius:6px;border:none;background:var(--p2);color:#fff;cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif">✓ Utiliser comme note</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="modal-footer">
+<div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-relance')">Annuler</button>
       <button class="btn btn-primary" onclick="confirmRelance()">✓ Enregistrer la relance</button>
     </div>
@@ -1127,13 +1151,14 @@ function doGet(e) {
 const PHASES = [
   { id: -1, key: 'p0', name: '1er Contact',              short: '1er Contact',  emoji: '📋', color: 'var(--p5)', bg: 'var(--p5-bg)', border: 'var(--p5-light)' },
   { id: 0, key: 'p1', name: 'Phase 1 – R1',           short: 'R1',          emoji: '🔵', color: 'var(--p1)', bg: 'var(--p1-bg)', border: 'var(--p1-light)' },
-  { id: 1, key: 'p2', name: 'Phase 2 – Mandat',        short: 'Mandat',      emoji: '🟢', color: 'var(--p2)', bg: 'var(--p2-bg)', border: 'var(--p2-light)' },
-  { id: 2, key: 'p3', name: 'Phase 3 – Banques',       short: 'Banques',     emoji: '🟣', color: 'var(--p3)', bg: 'var(--p3-bg)', border: 'var(--p3-light)' },
-  { id: 3, key: 'p4', name: 'Phase 4 – RDV Banque',    short: 'RDV Banque',  emoji: '🟠', color: 'var(--p4)', bg: 'var(--p4-bg)', border: 'var(--p4-light)' },
-  { id: 4, key: 'p5', name: 'Phase 5 – Offres',        short: 'Offres',      emoji: '🔷', color: 'var(--p5)', bg: 'var(--p5-bg)', border: 'var(--p5-light)' },
-  { id: 5, key: 'p6', name: 'Phase 6 – Notaire',       short: 'Notaire',     emoji: '🟤', color: 'var(--p6)', bg: 'var(--p6-bg)', border: 'var(--p6-light)' },
-  { id: 6, key: 'p7', name: 'Phase 7 – Honoraires',    short: 'Honoraires',  emoji: '💰', color: 'var(--p7)', bg: 'var(--p7-bg)', border: 'var(--p7-light)' },
-  { id: 7, key: 'pa', name: 'Abandonnés',               short: 'Abandonnés',  emoji: '🚫', color: 'var(--pa)', bg: 'var(--pa-bg)', border: 'var(--pa-light)' },
+  { id: 1, key: 'pr2', name: 'Phase 2 – R2',           short: 'R2',          emoji: '🔵', color: 'var(--p1)', bg: 'var(--p1-bg)', border: 'var(--p1-light)' },
+  { id: 2, key: 'p2', name: 'Phase 2 – Mandat',        short: 'Mandat',      emoji: '🟢', color: 'var(--p2)', bg: 'var(--p2-bg)', border: 'var(--p2-light)' },
+  { id: 3, key: 'p3', name: 'Phase 3 – Banques',       short: 'Banques',     emoji: '🟣', color: 'var(--p3)', bg: 'var(--p3-bg)', border: 'var(--p3-light)' },
+  { id: 4, key: 'p4', name: 'Phase 4 – RDV Banque',    short: 'RDV Banque',  emoji: '🟠', color: 'var(--p4)', bg: 'var(--p4-bg)', border: 'var(--p4-light)' },
+  { id: 5, key: 'p5', name: 'Phase 5 – Offres',        short: 'Offres',      emoji: '🔷', color: 'var(--p5)', bg: 'var(--p5-bg)', border: 'var(--p5-light)' },
+  { id: 6, key: 'p6', name: 'Phase 6 – Notaire',       short: 'Notaire',     emoji: '🟤', color: 'var(--p6)', bg: 'var(--p6-bg)', border: 'var(--p6-light)' },
+  { id: 7, key: 'p7', name: 'Phase 7 – Honoraires',    short: 'Honoraires',  emoji: '💰', color: 'var(--p7)', bg: 'var(--p7-bg)', border: 'var(--p7-light)' },
+  { id: 8, key: 'pa', name: 'Abandonnés',               short: 'Abandonnés',  emoji: '🚫', color: 'var(--pa)', bg: 'var(--pa-bg)', border: 'var(--pa-light)' },
 ];
 
 // Fields collected at each transition
@@ -1348,7 +1373,7 @@ function seedData() {
   var backup = [
   {
     "id": "DOS-001",
-    "phase": 2,
+    "phase": 3,
     "nom": "LE BRIS ",
     "prenom": "Louise",
     "telephone": "06 52 56 37 29",
@@ -1378,13 +1403,13 @@ function seedData() {
       {
         "date": "2026-04-08",
         "from": 0,
-        "to": 1,
+        "to": 2,
         "note": "Passage de R1 à Mandat"
       },
       {
         "date": "2026-04-08",
-        "from": 1,
-        "to": 2,
+        "from": 2,
+        "to": 3,
         "note": "Passage de Mandat à Banques"
       }
     ],
@@ -1749,7 +1774,7 @@ function renderCardHTML(dossier) {
   const nextPhase = dossier.phase === -1
     ? PHASES.find(function(p){ return p.id === 0; })
     : dossier.phase < 6 ? PHASES.find(function(p){ return p.id === dossier.phase + 1; }) : null;
-  const isAbandonne = dossier.phase >= 7;
+  const isAbandonne = dossier.phase >= 8;
   const keyFields = getKeyFields(dossier);
 
   // Deadline badge for P5
@@ -1857,6 +1882,14 @@ function getKeyFields(d) {
       { label: 'Revenus/mois', value: d.revenus ? Number(d.revenus).toLocaleString('fr-FR') + ' €' : null },
       { label: '👫 Co-emprunteur', value: d.coNom ? (d.coPrenom||'') + ' ' + d.coNom + (d.coTelephone?' · '+d.coTelephone:'') : null, full: true },
     ],
+    1: [
+      { label: 'Situation', value: d.typeContact },
+      { label: 'Date R2', value: d.dateR2 },
+      { label: 'Bien estimé', value: fmt(d.montantBienEstime) },
+      { label: 'Apport', value: fmt(d.apport) },
+      { label: 'Résultat R2', value: d.resultatR2 },
+      { label: '👫 Co-emprunteur', value: d.coNom ? (d.coPrenom||'') + ' ' + d.coNom : null, full: true },
+    ],
     0: [
       { label: 'Situation', value: d.typeContact },
       { label: 'Date R1', value: d.dateR1 },
@@ -1866,26 +1899,26 @@ function getKeyFields(d) {
       { label: 'Résultat R1', value: d.resultatR1 },
       { label: '👫 Co-emprunteur', value: d.coNom ? (d.coPrenom||'') + ' ' + d.coNom + (d.coTelephone?' · '+d.coTelephone:'') : null, full: true },
     ],
-    1: [
+    2: [
       { label: 'Mandat signé', value: d.dateMandat },
       { label: 'Montant prêt', value: fmt(d.montantPret) },
       { label: 'Apport', value: fmt(d.apport) },
       { label: 'Durée', value: d.duree ? d.duree + ' ans' : null },
       { label: '💶 Honoraires convenus', value: fmt(d.honorairesMandat) },
     ],
-    2: [
+    3: [
       { label: 'Banque choisie', value: d.banqueChoisie },
       { label: 'Taux retenu', value: d.tauxRetenu ? d.tauxRetenu + ' %' : null },
       { label: 'Montant prêt', value: fmt(d.montantPret) },
       { label: 'Date interrogation', value: d.dateInterro },
     ],
-    3: [
+    4: [
       { label: 'Banque', value: d.banqueChoisie },
       { label: 'Taux', value: d.tauxRetenu ? d.tauxRetenu + ' %' : null },
       { label: 'Date RDV', value: d.dateRdvBanque },
       { label: 'Heure', value: d.heureRdv },
     ],
-    4: [
+    5: [
       { label: 'Banque', value: d.banqueChoisie },
       { label: 'Taux', value: d.tauxRetenu ? d.tauxRetenu + ' %' : null },
       { label: 'Date offres', value: d.dateOffres },
@@ -1893,13 +1926,13 @@ function getKeyFields(d) {
       { label: 'TAEG', value: d.taeg ? d.taeg + ' %' : null },
       { label: 'Assurance', value: d.assurance ? d.assurance + ' %' : null },
     ],
-    5: [
+    6: [
       { label: 'Notaire', value: d.notaire },
       { label: 'Taux', value: d.tauxRetenu ? d.tauxRetenu + ' %' : null },
       { label: 'Signature prévue', value: d.dateSignaturePrevue },
       { label: 'Honoraires HT', value: fmt(d.honorairesHT) },
     ],
-    6: [
+    7: [
       { label: 'Banque', value: d.banqueChoisie },
       { label: 'Taux', value: d.tauxRetenu ? d.tauxRetenu + ' %' : null },
       { label: 'Signature', value: d.dateSignatureEffective },
@@ -1907,7 +1940,7 @@ function getKeyFields(d) {
       { label: 'Encaissement', value: d.dateEncaissement },
       { label: 'Mode paiement', value: d.modePaiement },
     ],
-    7: [
+    8: [
       { label: 'Motif', value: d.abandonMotif },
       { label: 'Phase abandon', value: d.abandonPhase },
       { label: 'Relance', value: d.abandonRelance },
@@ -1918,16 +1951,19 @@ function getKeyFields(d) {
 
 function getPhaseSubtitle(id) {
   if (id === -1) return '1er contact – qualification initiale du projet';
-  return [
-    'Premier rendez-vous – qualification du projet client',
-    'Mandat signé – montage et interrogation des banques',
-    'Banques interrogées – le client choisit sa banque',
-    'RDV fixé avec la banque partenaire',
-    'Offres de prêt éditées – en attente d\'acceptation',
-    'Signature de l\'acte chez le notaire',
-    'Dossiers finalisés – honoraires encaissés',
-    'Dossiers non aboutis',
-  ][id] || '';
+  if (id === 1) return 'R2 – Second rendez-vous client';
+  const subs = {
+    0: 'Premier rendez-vous – qualification du projet client',
+    1: 'Second rendez-vous – approfondissement du projet',
+    2: 'Mandat signé – montage et interrogation des banques',
+    3: 'Banques interrogées – le client choisit sa banque',
+    4: 'RDV fixé avec la banque partenaire',
+    5: 'Offres de prêt éditées – en attente d\'acceptation',
+    6: 'Signature de l\'acte chez le notaire',
+    7: 'Dossiers finalisés – honoraires encaissés',
+    8: 'Dossiers non aboutis',
+  };
+  return subs[id] || '';
 }
 
 // ─── OFFRES – DÉLAI J+11 & ALERTES ────────────────────────────────────────────
@@ -2125,7 +2161,7 @@ function getAgendaUrgentCount() {
   var apUrgents = getApporteursRappelsDuJour().length;
   var today = new Date().toISOString().split('T')[0];
   var dossiersToday = 0;
-  state.dossiers.filter(function(d){ return d.phase < 7; }).forEach(function(d) {
+  state.dossiers.filter(function(d){ return d.phase < 8; }).forEach(function(d) {
     (d.rappelsDossier||[]).forEach(function(r){ if (!r.fait && r.date <= today) dossiersToday++; });
   });
   return base + apUrgents + dossiersToday;
@@ -2537,7 +2573,21 @@ function getEditFields(phase) {
       { key: 'coTelephone',         label: 'Co-emprunteur — Téléphone',  type: 'text' },
       { key: 'coEmail',             label: 'Co-emprunteur — Email',      type: 'email' },
     ],
-    1: [ // Mandat
+    1: [ // R2
+      { key: 'typeContact',        label: 'Situation',              type: 'select', options: ['En recherche de bien','Offre acceptée','Compromis signé'] },
+      { key: 'montantBienEstime',  label: 'Montant bien (€)',       type: 'number' },
+      { key: 'apport',             label: 'Apport (€)',             type: 'number' },
+      { key: 'revenus',            label: 'Revenus/mois (€)',       type: 'number' },
+      { key: 'dateR2',             label: 'Date R2',                type: 'date' },
+      { key: 'resultatR2',         label: 'Résultat R2',            type: 'select', options: ['Qualifié','En attente','Non qualifié'] },
+      { key: 'notesR2',            label: 'Notes R2',               type: 'textarea', full: true },
+      { key: '_sep_co',            label: '',                       type: 'separator', full: true },
+      { key: 'coNom',              label: 'Co-emprunteur — Nom',    type: 'text' },
+      { key: 'coPrenom',           label: 'Co-emprunteur — Prénom', type: 'text' },
+      { key: 'coTelephone',        label: 'Co-emprunteur — Tél.',   type: 'text' },
+      { key: 'coEmail',            label: 'Co-emprunteur — Email',  type: 'email' },
+    ],
+    2: [ // Mandat
       { key: 'dateMandat',         label: 'Date mandat',            type: 'date' },
       { key: 'montantBien',        label: 'Montant bien (€)',        type: 'number' },
       { key: 'montantPret',        label: 'Montant prêt (€)',        type: 'number' },
@@ -2546,7 +2596,7 @@ function getEditFields(phase) {
       { key: 'honorairesMandat',   label: 'Honoraires convenus HT (€)', type: 'number' },
       { key: 'notesMandat',        label: 'Notes',                  type: 'textarea', full: true },
     ],
-    2: [ // Banques
+    3: [ // Banques
       { key: 'dateInterro',        label: 'Date interrogation',     type: 'date' },
       { key: 'banque1',            label: 'Banque 1',               type: 'text' },
       { key: 'taux1',              label: 'Taux banque 1 (%)',      type: 'text' },
@@ -2557,35 +2607,35 @@ function getEditFields(phase) {
       { key: 'banqueChoisie',      label: 'Banque choisie',         type: 'text' },
       { key: 'tauxRetenu',         label: 'Taux retenu (%)',        type: 'text' },
     ],
-    3: [ // RDV Banque
+    4: [ // RDV Banque
       { key: 'dateRdvBanque',      label: 'Date RDV banque',        type: 'date' },
       { key: 'heureRdv',           label: 'Heure',                  type: 'time' },
       { key: 'lieuRdv',            label: 'Lieu / Agence',          type: 'text' },
       { key: 'conseillerBanque',   label: 'Conseiller banque',      type: 'text' },
       { key: 'notesRdv',           label: 'Notes',                  type: 'textarea', full: true },
     ],
-    4: [ // Offres
+    5: [ // Offres
       { key: 'dateOffres',         label: "Date édition offres",    type: 'date' },
       { key: 'dateLimiteAcceptation', label: 'Date limite (J+11)', type: 'date' },
       { key: 'taeg',               label: 'TAEG (%)',               type: 'text' },
       { key: 'assurance',          label: 'Assurance (%)',          type: 'text' },
       { key: 'notesOffres',        label: 'Notes',                  type: 'textarea', full: true },
     ],
-    5: [ // Notaire
+    6: [ // Notaire
       { key: 'notaire',            label: 'Notaire',                type: 'text' },
       { key: 'dateSignaturePrevue',label: 'Date signature prévue',  type: 'date' },
       { key: 'montantBienDefinitif',label: 'Montant bien définitif (€)', type: 'number' },
       { key: 'honorairesHT',       label: 'Honoraires HT (€)',      type: 'number' },
       { key: 'notesNotaire',       label: 'Notes',                  type: 'textarea', full: true },
     ],
-    6: [ // Honoraires
+    7: [ // Honoraires
       { key: 'dateSignatureEffective', label: 'Date signature',     type: 'date' },
       { key: 'honorairesHT',       label: 'Honoraires HT (€)',      type: 'number' },
       { key: 'modePaiement',       label: 'Mode paiement',          type: 'select', options: ['Virement','Chèque','Espèces'] },
       { key: 'dateEncaissement',   label: 'Date encaissement',      type: 'date' },
       { key: 'notesHonoraires',    label: 'Notes',                  type: 'textarea', full: true },
     ],
-    7: [ // Abandonnés
+    8: [ // Abandonnés
       { key: 'abandonMotif',       label: 'Motif',                  type: 'text' },
       { key: 'abandonRelance',     label: 'Relance',                type: 'select', options: ['Non','Dans 3 mois','Dans 6 mois','Dans 1 an'] },
       { key: 'abandonNotes',       label: 'Notes',                  type: 'textarea', full: true },
@@ -2599,7 +2649,7 @@ function openEdit(dossierId) {
   if (!d) return;
   state.pendingEdit = dossierId;
 
-  const phase = PHASES[d.phase];
+  const phase = PHASES.find(p => p.id === d.phase) || PHASES[0];
   document.getElementById('edit-modal-title').innerHTML =
     `✏️ Modifier – ${d.prenom} ${d.nom} <span style="font-size:12px;font-weight:400;color:var(--text-muted)">${phase.emoji} ${phase.name}</span>`;
 
@@ -2776,7 +2826,7 @@ function getRappelsDuJour() {
   // today = filtre pour le badge, mais on affiche tout dans la page
 
   // Rappels des dossiers (actions suivi)
-  state.dossiers.filter(function(d){ return d.phase < 7; }).forEach(function(d) {
+  state.dossiers.filter(function(d){ return d.phase < 8; }).forEach(function(d) {
     ACTIONS_SUIVI.forEach(function(a) {
       var r = (d.actionsRappel||{})[a.key];
       if (r && r <= today) items.push({ type:'dossier', d: d, a: a, date: r, label: a.label });
@@ -2997,13 +3047,15 @@ function saveNote(dossierId) {
 
 // ─── RAPPELS DOSSIER ──────────────────────────────────────────────────────────
 const RAPPELS_SUGGESTIONS = {
-  0: ['Relancer pour signature du mandat', 'Vérifier documents manquants', 'Envoyer simulation de prêt', 'Rappeler résultat R1'],
-  1: ['Interroger les banques', 'Vérifier dossier complet', 'Relancer pour choix banque', 'Envoyer compromis à la banque'],
-  2: ['Relancer la banque pour accord', 'Vérifier retour banque', 'Prendre RDV avec conseiller banque', 'Rappeler le client'],
-  3: ['Confirmer RDV banque', 'Vérifier résultat RDV', 'Relancer après RDV', 'Rappeler le client'],
-  4: ['Vérifier réception offres', 'Rappeler délai J+11', 'Confirmer acceptation offres', 'Relance SMS client'],
-  5: ['Confirmer date signature notaire', 'Vérifier déblocage fonds', 'Relancer le notaire', 'Rappeler le client'],
-  6: ['Vérifier encaissement honoraires', 'Envoyer facture', 'Demander recommandation client'],
+  '-1': ['Envoyer simulation de prêt', 'Rappeler le client', 'Fixer RDV R1', 'Vérifier intérêt du projet', 'Relancer par SMS'],
+  0: ['Relancer pour RDV R2', 'Envoyer simulation mise à jour', 'Vérifier documents manquants', 'Rappeler résultat R1'],
+  1: ['Relancer pour signature du mandat', 'Envoyer récap simulation', 'Vérifier pièces manquantes', 'Confirmer projet avec client'],
+  2: ['Interroger les banques', 'Vérifier dossier complet', 'Relancer pour choix banque', 'Envoyer compromis à la banque'],
+  3: ['Relancer la banque pour accord', 'Vérifier retour banque', 'Prendre RDV avec conseiller banque', 'Rappeler le client'],
+  4: ['Confirmer RDV banque', 'Vérifier résultat RDV', 'Relancer après RDV', 'Rappeler le client'],
+  5: ['Vérifier réception offres', 'Rappeler délai J+11', 'Confirmer acceptation offres', 'Relance SMS client'],
+  6: ['Confirmer date signature notaire', 'Vérifier déblocage fonds', 'Relancer le notaire', 'Rappeler le client'],
+  7: ['Vérifier encaissement honoraires', 'Envoyer facture', 'Demander recommandation client'],
 };
 
 function buildRappelsDossierBlock(dossier) {
@@ -3683,6 +3735,61 @@ function seedApporteurs() {
 
   ];
   saveState();
+}
+
+
+// ─── IA MESSAGE GENERATION ────────────────────────────────────────────────────
+async function genererMessageIA() {
+  const contexte = document.getElementById('relance-ia-contexte').value.trim();
+  const type     = document.getElementById('relance-ia-type').value;
+  const d        = state.dossiers.find(x => x.id === state.pendingRelance);
+
+  if (!contexte) { toast('Décris ce que tu veux dire', 'error'); return; }
+
+  const btn = event.currentTarget;
+  btn.textContent = '⏳ Génération en cours...';
+  btn.disabled = true;
+
+  const client = d ? `${d.prenom} ${d.nom}` : 'le client';
+  const typeLabel = type === 'sms' ? 'SMS court et sympa (max 160 caractères)' : type === 'formel' ? 'email professionnel et formel' : 'email professionnel et chaleureux';
+
+  const prompt = `Tu es un courtier immobilier. Génère un ${typeLabel} pour ${client}.
+
+Contexte : ${contexte}
+
+Réponds uniquement avec le message, sans explication.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const msg = data.content?.[0]?.text || '';
+    document.getElementById('ia-message').value = msg;
+    document.getElementById('ia-result').style.display = 'block';
+  } catch(e) {
+    toast('Erreur IA — vérifie ta connexion', 'error');
+  }
+  btn.textContent = '✨ Générer le message';
+  btn.disabled = false;
+}
+
+function copierMessageIA() {
+  const msg = document.getElementById('ia-message').value;
+  navigator.clipboard.writeText(msg).then(() => toast('📋 Message copié !', 'success'));
+}
+
+function utiliserMessageIA() {
+  const msg = document.getElementById('ia-message').value;
+  document.getElementById('relance-note').value = msg;
+  document.getElementById('ia-result').style.display = 'none';
+  toast('✓ Message ajouté comme note', 'success');
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
