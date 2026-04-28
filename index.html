@@ -1373,7 +1373,7 @@ function seedData() {
   var backup = [
   {
     "id": "DOS-001",
-    "phase": 3,
+    "phase": 4,
     "nom": "LE BRIS ",
     "prenom": "Louise",
     "telephone": "06 52 56 37 29",
@@ -1403,13 +1403,25 @@ function seedData() {
       {
         "date": "2026-04-08",
         "from": 0,
-        "to": 2,
+        "to": 1,
         "note": "Passage de R1 à Mandat"
       },
       {
         "date": "2026-04-08",
+        "from": 1,
+        "to": 2,
+        "note": "Passage de Mandat à Banques"
+      },
+      {
+        "date": "2026-04-28",
         "from": 2,
         "to": 3,
+        "note": "Passage de R2 à Mandat"
+      },
+      {
+        "date": "2026-04-28",
+        "from": 3,
+        "to": 4,
         "note": "Passage de Mandat à Banques"
       }
     ],
@@ -1434,9 +1446,32 @@ function seedData() {
         "note": "RV BANQUE DEMAIN 28/04/2026",
         "detail": "Envoyer SMS Louise Pour rappel RV Banque demain 17h RV à 16h50 devant pour rappel contreparties",
         "date": "2026-04-27",
-        "fait": false
+        "fait": true
       }
-    ]
+    ],
+    "relances": [
+      {
+        "date": "2026-04-28",
+        "heure": "07:51",
+        "type": "banque",
+        "note": "SMS envoyé à l'instant"
+      },
+      {
+        "date": "2026-04-28",
+        "heure": "10:12",
+        "type": "banque",
+        "note": ""
+      }
+    ],
+    "dateRdvBanque": "2026-04-28",
+    "heureRdv": "17:00",
+    "lieuRdv": "",
+    "conseillerBanque": "",
+    "notesRdv": "",
+    "dateOffres": "2026-04-28",
+    "taeg": "",
+    "assurance": "",
+    "notesOffres": ""
   },
   {
     "id": "DOS-003",
@@ -1482,7 +1517,7 @@ function seedData() {
   },
   {
     "id": "DOS-004",
-    "phase": 0,
+    "phase": -1,
     "nom": "DELAVIER ",
     "prenom": "Damien",
     "telephone": "07 82 48 77 96",
@@ -1505,12 +1540,27 @@ function seedData() {
         "from": -1,
         "to": 0,
         "note": "Création du dossier"
+      },
+      {
+        "date": "2026-04-24",
+        "from": 0,
+        "to": -1,
+        "note": "← Retour en 1er Contact"
+      }
+    ],
+    "rappelsDossier": [
+      {
+        "id": "R-1777383865493",
+        "note": "RELANCE POUR SAVOIR S4IL VEUT DES CONTACTS IMMOBILIER ",
+        "detail": "Bouygues Immo ou Kérisel",
+        "date": "2026-04-30",
+        "fait": false
       }
     ]
   },
   {
     "id": "DOS-005",
-    "phase": 0,
+    "phase": -1,
     "nom": "GOUGEON",
     "prenom": "Maxence",
     "telephone": "06 30 63 12 15",
@@ -1533,6 +1583,12 @@ function seedData() {
         "from": -1,
         "to": 0,
         "note": "Création du dossier"
+      },
+      {
+        "date": "2026-04-24",
+        "from": 0,
+        "to": -1,
+        "note": "← Retour en 1er Contact"
       }
     ],
     "rappelsDossier": [
@@ -1541,13 +1597,13 @@ function seedData() {
         "note": "RELANCE SMS une dernière fois",
         "detail": "Après envoi mail et SMS, dernière fouis : Relancer par SMS",
         "date": "2026-04-28",
-        "fait": false
+        "fait": true
       }
     ]
   },
   {
     "id": "DOS-006",
-    "phase": 0,
+    "phase": -1,
     "nom": "PERRIN",
     "prenom": "Mathilde",
     "telephone": "06 51 49 53 44",
@@ -1570,6 +1626,12 @@ function seedData() {
         "from": -1,
         "to": 0,
         "note": "Création du dossier"
+      },
+      {
+        "date": "2026-04-24",
+        "from": 0,
+        "to": -1,
+        "note": "← Retour en 1er Contact"
       }
     ],
     "rappelsDossier": [
@@ -1578,13 +1640,145 @@ function seedData() {
         "note": "RELANCER UNE DERNIERE FOIS",
         "detail": "Après entretien téléphonique, mail envoyé pour récupérer pièces. Toujours pas de pièce reçues. Envoi SMS ce jour pour savoir si le projet est abandonné ou pas ?",
         "date": "2026-04-28",
+        "fait": true
+      },
+      {
+        "id": "R-1777384060804",
+        "note": "RELANCER UNE DERNIERE FOIS",
+        "detail": "",
+        "date": "2026-05-05",
+        "fait": false
+      }
+    ]
+  },
+  {
+    "id": "DOS-007",
+    "phase": -1,
+    "nom": "DUBOIS",
+    "prenom": "Damien",
+    "telephone": "06 47 89 29 14",
+    "email": "dada5327@laposte.net",
+    "origine": "Lead",
+    "origineNom": "",
+    "originePrenom": "",
+    "origineEntreprise": "",
+    "origineTel": "",
+    "origineEmail": "",
+    "typeContact": "En recherche de bien",
+    "montantBienEstime": "137500",
+    "apport": "10000",
+    "revenus": "2400",
+    "dateR1": "2026-04-27",
+    "resultatR1": "Qualifié",
+    "notesR1": "Bien trouvé qui reste à être visité avec sa fille et son fille : 137 500 €\nApport de sa mère à valider de 10 000 €\n\n",
+    "coNom": "",
+    "coPrenom": "",
+    "coTelephone": "",
+    "coEmail": "",
+    "history": [
+      {
+        "date": "2026-04-27",
+        "from": -1,
+        "to": 0,
+        "note": "Création du dossier"
+      }
+    ]
+  },
+  {
+    "id": "DOS-008",
+    "phase": -1,
+    "nom": "DUBOIS",
+    "prenom": "Damien",
+    "telephone": "06 47 89 29 14",
+    "email": "dada5327@laposte.net",
+    "origine": "Lead",
+    "origineNom": "",
+    "originePrenom": "",
+    "origineEntreprise": "",
+    "origineTel": "",
+    "origineEmail": "",
+    "typeContact": "",
+    "montantBienEstime": "137500",
+    "apport": "10000",
+    "revenus": "2390",
+    "dateR1": "2026-04-27",
+    "resultatR1": "Qualifié",
+    "notesR1": "Bien trouvé qui reste à visiter avec sa fille et son fils.\nValider avec lui l'apport de sa mère de 10 000 €.\nmail envoyé ce matin liste petite liste pièces afin de valider au pus vite la simulation faite en live hier soir 27 avril",
+    "coNom": "",
+    "coPrenom": "",
+    "coTelephone": "",
+    "coEmail": "",
+    "history": [
+      {
+        "date": "2026-04-27",
+        "from": -1,
+        "to": 0,
+        "note": "Création du dossier"
+      }
+    ],
+    "rappelsDossier": [
+      {
+        "id": "R-1777363890639",
+        "note": "Où en est-il ?",
+        "detail": "Visite faire avec sa fille, son fils et sa mère ?\nNégociation avec l’agent Immo de France ?",
+        "date": "2026-05-06",
+        "fait": false
+      }
+    ]
+  },
+  {
+    "id": "DOS-009",
+    "phase": -1,
+    "nom": "LECOMTE",
+    "prenom": "Kévin",
+    "telephone": "06 71 68 64 63",
+    "email": "kevin.lecomte5@orange.fr",
+    "origine": "Lead",
+    "origineNom": "",
+    "originePrenom": "",
+    "origineEntreprise": "",
+    "origineTel": "",
+    "origineEmail": "",
+    "typeContact": "",
+    "montantBienEstime": "150000",
+    "apport": "10000",
+    "revenus": "2905",
+    "dateR1": "2025-12-17",
+    "resultatR1": "À retravailler",
+    "notesR1": "En recherche de bien.\nLimite niveau budget",
+    "coNom": "SAUBLURIER",
+    "coPrenom": "Sophie",
+    "coTelephone": "06 89 06 71 32",
+    "coEmail": "soph.sublaurier@gmail.com",
+    "history": [
+      {
+        "date": "2025-12-17",
+        "from": -1,
+        "to": 0,
+        "note": "Création du dossier"
+      }
+    ],
+    "notesLibres": [
+      {
+        "date": "28/04/2026",
+        "heure": "15:42",
+        "phase": "1er Contact",
+        "texte": "Mail de la cliente (Sophie) ce jour qui relance pour savoir les taux actuels. Réponse faite ce jour. A relancer pour accélérer recherche de bien"
+      }
+    ],
+    "rappelsDossier": [
+      {
+        "id": "R-1777383776225",
+        "note": "RELANCE Pour savopir où ils en sont",
+        "detail": "",
+        "date": "2026-05-04",
         "fait": false
       }
     ]
   }
 ];
   state.dossiers = backup;
-  state.nextId = 7;
+  state.nextId = 10;
   saveState();
 }
 
@@ -1860,6 +2054,7 @@ function renderCardHTML(dossier) {
           </button>
         ` : ''}
         <button class="btn btn-ghost btn-sm" onclick="openEdit('${dossier.id}')" title="Modifier la fiche">✏️</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--pa)" onclick="deleteDossier('${dossier.id}')" title="Supprimer définitivement">🗑</button>
         ${!isAbandonne && dossier.phase < 7 ? `
           <button class="btn btn-ghost btn-sm" onclick="openAbandon('${dossier.id}')">🚫</button>
         ` : ''}
@@ -3790,6 +3985,16 @@ function utiliserMessageIA() {
   document.getElementById('relance-note').value = msg;
   document.getElementById('ia-result').style.display = 'none';
   toast('✓ Message ajouté comme note', 'success');
+}
+
+
+function deleteDossier(id) {
+  const d = state.dossiers.find(x => x.id === id);
+  if (!d) return;
+  if (!confirm('Supprimer définitivement le dossier de ' + d.prenom + ' ' + d.nom + ' ?\nCette action est irréversible.')) return;
+  state.dossiers = state.dossiers.filter(x => x.id !== id);
+  saveState(); render();
+  toast('🗑 Dossier supprimé', 'info');
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
