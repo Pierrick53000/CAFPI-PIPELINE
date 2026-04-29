@@ -670,6 +670,36 @@ body {
 .rappel-list-date.past { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
 .rappel-list-text { flex: 1; color: var(--text-muted); }
 
+
+/* ── STATUT APPORTEUR ── */
+.statut-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.statut-prospecter  { background: var(--p5-bg); color: var(--p5); border: 1px solid var(--p5-light); }
+.statut-contacte    { background: var(--p4-bg); color: var(--p4); border: 1px solid var(--p4-light); }
+.statut-actif       { background: var(--p2-bg); color: var(--p2); border: 1px solid var(--p2-light); }
+.btn-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  transition: all .15s;
+}
+.btn-statut:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -1143,6 +1173,41 @@ function doGet(e) {
   </div>
 </div>
 
+
+<!-- MODAL RAPPEL APPORTEUR -->
+<div class="modal-overlay" id="modal-rap-apporteur">
+  <div class="modal" style="width:480px">
+    <div class="modal-header">
+      <span class="modal-title">🔔 Nouveau rappel apporteur</span>
+      <button class="modal-close" onclick="document.getElementById('modal-rap-apporteur').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Apporteur *</label>
+          <select id="rap-apporteur"></select>
+        </div>
+        <div class="form-group">
+          <label>Sujet du rappel *</label>
+          <input type="text" id="rap-sujet" placeholder="Ex: Appeler pour présenter offre...">
+        </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="rap-date">
+        </div>
+        <div class="form-group full">
+          <label>Détails (optionnel)</label>
+          <textarea id="rap-detail" placeholder="Ce que tu dois lui dire ou demander..." style="min-height:70px"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-rap-apporteur').classList.remove('open')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRappelApporteur()">✓ Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOASTS -->
 <div class="toast-container" id="toast-container"></div>
 
@@ -1375,7 +1440,7 @@ function seedData() {
   var backup = [
   {
     "id": "DOS-001",
-    "phase": 4,
+    "phase": 5,
     "nom": "LE BRIS ",
     "prenom": "Louise",
     "telephone": "06 52 56 37 29",
@@ -1425,6 +1490,12 @@ function seedData() {
         "from": 3,
         "to": 4,
         "note": "Passage de Mandat à Banques"
+      },
+      {
+        "date": "2026-04-28",
+        "from": 4,
+        "to": 5,
+        "note": "Passage de Banques à RDV Banque"
       }
     ],
     "dateMandat": "2026-03-10",
@@ -1449,6 +1520,20 @@ function seedData() {
         "detail": "Envoyer SMS Louise Pour rappel RV Banque demain 17h RV à 16h50 devant pour rappel contreparties",
         "date": "2026-04-27",
         "fait": true
+      },
+      {
+        "id": "R-1777393993880",
+        "note": "Vérifier résultat RDV RV Notaire Date et heure Charlène",
+        "detail": "Qui pour aller à ma place ?",
+        "date": "2026-05-05",
+        "fait": true
+      },
+      {
+        "id": "R-1777443689126",
+        "note": "Voir Charlène : Date et horaire RV Signature Notaire",
+        "detail": "URGENT : Qui appelle le Notaire, moi ou Charlène ?",
+        "date": "2026-04-29",
+        "fait": false
       }
     ],
     "relances": [
@@ -1473,7 +1558,12 @@ function seedData() {
     "dateOffres": "2026-04-28",
     "taeg": "",
     "assurance": "",
-    "notesOffres": ""
+    "notesOffres": "",
+    "notaire": "MM Robert Buron",
+    "dateSignaturePrevue": "2026-05-29",
+    "montantBienDefinitif": "",
+    "honorairesHT": "",
+    "notesNotaire": ""
   },
   {
     "id": "DOS-003",
@@ -1777,10 +1867,690 @@ function seedData() {
         "fait": false
       }
     ]
+  },
+  {
+    "id": "DOS-010",
+    "phase": -1,
+    "nom": "CAGNON",
+    "prenom": "Matthias",
+    "telephone": "06 42 46 18 85",
+    "email": "cagnon.matthias@outlook.com",
+    "origine": "Lead",
+    "origineNom": "",
+    "originePrenom": "",
+    "origineEntreprise": "",
+    "origineTel": "",
+    "origineEmail": "",
+    "typeContact": "En recherche de bien",
+    "montantBienEstime": "",
+    "apport": "",
+    "revenus": "",
+    "dateR1": "2026-04-29",
+    "resultatR1": "",
+    "notesR1": "En recherche de biens\nPour rappel : 2 chiens Malinois\n1 emploi de cuisinier à Mayenne + 1 emploi Chez BEL Evron\nRelevés de comptes pas très cleans : Attendre d'avoir 3 relevés clens/ ",
+    "coNom": "",
+    "coPrenom": "",
+    "coTelephone": "",
+    "coEmail": "",
+    "history": [
+      {
+        "date": "2026-04-29",
+        "from": -1,
+        "to": 0,
+        "note": "Création du dossier"
+      }
+    ],
+    "rappelsDossier": [
+      {
+        "id": "R-1777443610566",
+        "note": "juste des news ",
+        "detail": "Bonjour Matthias, comment vas -tu ?\nOù en es-tu dans ton projet immo ? Relevés comptes cleans ????",
+        "date": "2026-06-01",
+        "fait": false
+      }
+    ]
   }
 ];
-  state.dossiers = backup;
-  state.nextId = 10;
+  state.dossiers   = backup;
+  state.nextId     = 11;
+  state.apporteurs = [
+  {
+    "id": "AP-1777393936628",
+    "nom": "L'Adresse Laval",
+    "type": "Agence immobilière",
+    "societe": "L'Adresse",
+    "role": "Vente, location, gestion, syndic",
+    "adresse": "50 boulevard Félix Grat, 53000 Laval",
+    "telephone": "02 53 74 55 54",
+    "email": "",
+    "dept": "53",
+    "notes": "Réseau L'Adresse",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936629",
+    "nom": "Breton & Jeanneau Immobilier",
+    "type": "Agence immobilière",
+    "societe": "Breton & Jeanneau",
+    "role": "Transaction, gestion, syndic",
+    "adresse": "3 quai Sadi Carnot, 53000 Laval",
+    "telephone": "02 43 53 44 44",
+    "email": "",
+    "dept": "53",
+    "notes": "Centre-ville Laval",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936630",
+    "nom": "Guédon Immobilier Laval",
+    "type": "Agence immobilière",
+    "societe": "Guédon Immobilier",
+    "role": "Transaction, location, syndic",
+    "adresse": "74 avenue Robert Buron, 53000 Laval",
+    "telephone": "02 43 53 11 17",
+    "email": "agencelaval@guedon-immobilier.com",
+    "dept": "53",
+    "notes": "Syndic copropriété",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936631",
+    "nom": "Sogesim Laval",
+    "type": "Agence immobilière",
+    "societe": "Sogesim",
+    "role": "Vente, location, gestion, syndic",
+    "adresse": "145 rue de Paris, 53000 Laval",
+    "telephone": "02 43 53 34 40",
+    "email": "",
+    "dept": "53",
+    "notes": "Syndic copropriété",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936632",
+    "nom": "Square Habitat Laval",
+    "type": "Agence immobilière",
+    "societe": "Square Habitat",
+    "role": "Transaction, gestion, syndic",
+    "adresse": "47 rue de la Paix, 53000 Laval",
+    "telephone": "02 43 56 85 85",
+    "email": "siege@squarehabitat.fr",
+    "dept": "53",
+    "notes": "Réseau Crédit Agricole",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936633",
+    "nom": "IMMO de France Ouest Laval",
+    "type": "Agence immobilière",
+    "societe": "IMMO de France Ouest",
+    "role": "Transaction, location, syndic",
+    "adresse": "12 rue Souchu Servinière, 53000 Laval",
+    "telephone": "02 43 59 12 12",
+    "email": "",
+    "dept": "53",
+    "notes": "Groupe Procivis — syndic copropriété",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936634",
+    "nom": "Citya Laval",
+    "type": "Agence immobilière",
+    "societe": "Citya",
+    "role": "Transaction, gestion, syndic",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Réseau national Citya",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936635",
+    "nom": "Bien(s) Immobilier",
+    "type": "Agence immobilière",
+    "societe": "Bien(s)",
+    "role": "Transaction, location",
+    "adresse": "10 rue Pauline et Daniel Oehlert, 53000 Laval",
+    "telephone": "02 43 53 83 07",
+    "email": "",
+    "dept": "53",
+    "notes": "Agence indépendante mayennaise",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936636",
+    "nom": "TDM 53 Immobilier",
+    "type": "Agence immobilière",
+    "societe": "TDM 53",
+    "role": "Transaction, gestion, syndic",
+    "adresse": "Changé, 53810",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Basée à Changé — agglo Laval",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936637",
+    "nom": "Fraudin Immobilier",
+    "type": "Agence immobilière",
+    "societe": "Fraudin Immobilier",
+    "role": "Transaction, location",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936638",
+    "nom": "Marimo Immobilier",
+    "type": "Agence immobilière",
+    "societe": "Marimo",
+    "role": "Location, transaction, gestion",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936639",
+    "nom": "Méduane Habitat",
+    "type": "Agence immobilière",
+    "societe": "Méduane Habitat",
+    "role": "Bailleur social, gestion locative",
+    "adresse": "15 quai André Pinçon, 53000 Laval",
+    "telephone": "02 43 53 34 40",
+    "email": "",
+    "dept": "53",
+    "notes": "Bailleur social Mayenne — également constructeur",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936647",
+    "nom": "Office Fourcade-Foubert / Guittier / Tahar",
+    "type": "Notaire",
+    "societe": "Office notarial",
+    "role": "Notaires associés",
+    "adresse": "8 allée Louis Vincent, 53000 Laval",
+    "telephone": "02 43 53 23 05",
+    "email": "",
+    "dept": "53",
+    "notes": "Me Sylvia Fourcade-Foubert, Me Olivier Guittier, Me Olivia Tahar",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936648",
+    "nom": "LM 53 Notaires SELAS",
+    "type": "Notaire",
+    "societe": "LM 53 Notaires",
+    "role": "Notaires associés",
+    "adresse": "94 avenue Robert Buron, 53000 Laval",
+    "telephone": "02 43 53 38 50",
+    "email": "",
+    "dept": "53",
+    "notes": "Me Collet, Me Rozel, Me Ory, Me Desmots — annexes Bonchamp, Argentré, Montsûrs",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936649",
+    "nom": "Office Fouilleul / Riou / Tombeck",
+    "type": "Notaire",
+    "societe": "Office notarial",
+    "role": "Notaires associés",
+    "adresse": "16 rue de l'Ancien Évêché, 53000 Laval",
+    "telephone": "02 43 59 21 00",
+    "email": "",
+    "dept": "53",
+    "notes": "Me Pierre-Henry Fouilleul, Me Nadine Riou, Me Catherine Tombeck",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936650",
+    "nom": "SCP Derrien - Maugeais",
+    "type": "Notaire",
+    "societe": "SCP Derrien Maugeais",
+    "role": "Notaires associés",
+    "adresse": "29 rue des Déportés, 53000 Laval",
+    "telephone": "02 43 59 28 40",
+    "email": "",
+    "dept": "53",
+    "notes": "Me Pascal Maugeais, Me Hubert Derrien",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936651",
+    "nom": "Office Pham Sigmann / Duval / Corde et al.",
+    "type": "Notaire",
+    "societe": "Office notarial",
+    "role": "Notaires associés",
+    "adresse": "35 rue des Fossés, 53000 Laval",
+    "telephone": "02 43 66 86 00",
+    "email": "",
+    "dept": "53",
+    "notes": "Me Pham Sigmann, Me Duval, Me Corde, Me Brière, Me Hervé, Me Jamoteau-Bouquet, Me Mouchel, Me Perreau",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936652",
+    "nom": "Etude Darphin",
+    "type": "Notaire",
+    "societe": "Etude Darphin",
+    "role": "Notaire",
+    "adresse": "4 rue Pauline et Daniel Oehlert, 53000 Laval",
+    "telephone": "02 43 53 77 10",
+    "email": "",
+    "dept": "53",
+    "notes": "Me Jean-Christophe Darphin",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936653",
+    "nom": "Me Gérald Pautrel-Réauté",
+    "type": "Notaire",
+    "societe": "Office notarial",
+    "role": "Notaire",
+    "adresse": "45 rue Albert Thomas, 53000 Laval",
+    "telephone": "07 72 20 86 44",
+    "email": "",
+    "dept": "53",
+    "notes": "",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936654",
+    "nom": "Me Rémy Leroux",
+    "type": "Notaire",
+    "societe": "Office notarial",
+    "role": "Notaire",
+    "adresse": "Rue Louis De Broglie, 53810 Changé",
+    "telephone": "02 44 84 17 18",
+    "email": "",
+    "dept": "53",
+    "notes": "Changé — agglo Laval",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936655",
+    "nom": "Me Guillaume Leplatois",
+    "type": "Notaire",
+    "societe": "Office notarial",
+    "role": "Notaire",
+    "adresse": "16 rue du Centre, 53810 Changé",
+    "telephone": "02 43 65 03 12",
+    "email": "",
+    "dept": "53",
+    "notes": "Changé — agglo Laval",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936656",
+    "nom": "Me Claire Gouabau",
+    "type": "Notaire",
+    "societe": "Office notarial",
+    "role": "Notaire",
+    "adresse": "25 avenue du Général de Gaulle, 53940 Saint-Berthevin",
+    "telephone": "02 52 21 03 08",
+    "email": "",
+    "dept": "53",
+    "notes": "Saint-Berthevin — agglo Laval",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936657",
+    "nom": "Me Mélina Lemée",
+    "type": "Notaire",
+    "societe": "Lemée Notaire",
+    "role": "Notaire",
+    "adresse": "1 rue de Laval, 53970 L'Huisserie",
+    "telephone": "02 43 02 02 35",
+    "email": "",
+    "dept": "53",
+    "notes": "L'Huisserie — agglo Laval — signature électronique",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936667",
+    "nom": "Cerfrance Mayenne-Sarthe Laval",
+    "type": "Expert-comptable",
+    "societe": "Cerfrance",
+    "role": "Expertise comptable, conseil",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "60 ans expérience — 18 agences Mayenne/Sarthe",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936668",
+    "nom": "Cogedis Laval",
+    "type": "Expert-comptable",
+    "societe": "Cogedis",
+    "role": "Expertise comptable, conseil",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "19 000 clients — 80 bureaux France",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936669",
+    "nom": "Fiteco Laval",
+    "type": "Expert-comptable",
+    "societe": "Fiteco",
+    "role": "Expertise comptable, conseil",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Plus de 50 ans — 80 bureaux nationaux",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936670",
+    "nom": "Talenz Sofidem Laval",
+    "type": "Expert-comptable",
+    "societe": "Talenz Sofidem",
+    "role": "Expertise comptable, audit",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "40 ans — pôles comptabilité, audit, conseil",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936671",
+    "nom": "RSM Laval",
+    "type": "Expert-comptable",
+    "societe": "RSM",
+    "role": "Expertise comptable, audit",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Réseau international — PME et ETI",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936672",
+    "nom": "Fiducial Expertise Laval",
+    "type": "Expert-comptable",
+    "societe": "Fiducial",
+    "role": "Expertise comptable, conseil",
+    "adresse": "Centre Affaires Technopolis, Rue Louis de Broglie, 53810 Changé",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "50 ans expérience — professions libérales et artisans",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936673",
+    "nom": "Altonéo Laval",
+    "type": "Expert-comptable",
+    "societe": "Altonéo",
+    "role": "Expertise comptable, conseil",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "300 collaborateurs — ESS, PME, agriculture",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936674",
+    "nom": "Figecal Laval",
+    "type": "Expert-comptable",
+    "societe": "Figecal",
+    "role": "Expertise comptable, conseil",
+    "adresse": "Avenue Chanzy, 53000 Laval",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Francophones et anglophones — particuliers et pros",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936675",
+    "nom": "TYLS Cabinet Comptable Laval",
+    "type": "Expert-comptable",
+    "societe": "TYLS",
+    "role": "Expertise comptable, conseil",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Présent à Château-Gontier, Craon, Mayenne",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936676",
+    "nom": "KPMG Laval",
+    "type": "Expert-comptable",
+    "societe": "KPMG",
+    "role": "Audit, conseil, expertise",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Grand cabinet international — grandes entreprises",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936677",
+    "nom": "Sadeco Laval",
+    "type": "Expert-comptable",
+    "societe": "Sadeco",
+    "role": "Expertise comptable, audit",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "50 collaborateurs — conseil et audit",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936687",
+    "nom": "Lelièvre Immobilier (ex-Atrealis)",
+    "type": "Promoteur immobilier",
+    "societe": "Lelièvre Immobilier",
+    "role": "Promotion, aménagement, construction",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Ex-Atrealis Promotion depuis jan. 2026 — Groupe Lelièvre sarthois",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936688",
+    "nom": "Procivis Ouest Promoteur",
+    "type": "Promoteur immobilier",
+    "societe": "Procivis Ouest",
+    "role": "Promotion immobilière",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Appartements neufs Pays de la Loire",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936689",
+    "nom": "Laval Mayenne Aménagements",
+    "type": "Promoteur immobilier",
+    "societe": "LMA",
+    "role": "Aménagement foncier, terrains à bâtir",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Terrains aménagés prêts à bâtir",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936690",
+    "nom": "Bati Alliance / Bati Concept",
+    "type": "Constructeur de maisons",
+    "societe": "Bati Alliance",
+    "role": "Construction maisons individuelles",
+    "adresse": "Laval, 53000",
+    "telephone": "02 43 68 37 37",
+    "email": "",
+    "dept": "53",
+    "notes": "Créé en 1978 — sur-mesure — agglo Laval et 53",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936691",
+    "nom": "Villadéale Laval",
+    "type": "Constructeur de maisons",
+    "societe": "Villadéale",
+    "role": "Construction maisons individuelles",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Depuis 2006 — très bien noté clients",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936692",
+    "nom": "Maisons Le Masson Laval",
+    "type": "Constructeur de maisons",
+    "societe": "Maisons Le Masson",
+    "role": "Construction maisons individuelles RE2020",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Spécialiste RE 2020 Mayenne",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936693",
+    "nom": "Maisons France Confort Mayenne",
+    "type": "Constructeur de maisons",
+    "societe": "Maisons France Confort",
+    "role": "Construction maisons individuelles",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Groupe Hexaom — leader national depuis 1919",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936694",
+    "nom": "Maisons Socoren Laval",
+    "type": "Constructeur de maisons",
+    "societe": "Maisons Socoren",
+    "role": "Construction maisons individuelles",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Depuis 1981 — maisons traditionnelles et contemporaines",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936695",
+    "nom": "Mikit Mayenne",
+    "type": "Constructeur de maisons",
+    "societe": "Mikit",
+    "role": "Construction maisons prêt-à-finir",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Concept prêt-à-finir — économique — réseau 35 ans",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777393936696",
+    "nom": "2MI Mayen'Maison Individuelle",
+    "type": "Constructeur de maisons",
+    "societe": "2MI",
+    "role": "Construction maisons sur-mesure",
+    "adresse": "Laval, 53000",
+    "telephone": "",
+    "email": "",
+    "dept": "53",
+    "notes": "Plans 3D sur-mesure — www.2mi-construction.fr",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777444896980",
+    "nom": "FRETIGNE Kavita",
+    "societe": "Notaire",
+    "role": "Vendeuse",
+    "telephone": "06 63 61 05 47",
+    "email": "ckavita53@hotmail.com",
+    "dept": "53",
+    "type": "Notaire",
+    "notes": "Relance mail ce jour, à relancer le 15 mai",
+    "prochainRappel": "2026-06-15",
+    "actionsLog": {
+      "rappel_global": "29/04/2026"
+    },
+    "actionsRappel": {
+      "rappel_global": "2026-04-29"
+    },
+    "statut": "contacte",
+    "dateDernierContact": "2026-04-29"
+  }
+];
   saveState();
 }
 
@@ -1798,16 +2568,28 @@ function renderSidebar() {
   const sb = document.getElementById('sidebar');
   sb.innerHTML = `
     <div class="sidebar-section">Apporteurs</div>
-    <div class="nav-item ${state.currentView==='apporteurs'?'active':''}" style="--phase-color:var(--p4)" onclick="setView('apporteurs')">
+    <div class="nav-item ${state.currentView==='apporteurs'?'active':''}" style="--phase-color:var(--p5)" onclick="setView('apporteurs')">
       <span>🎯</span><span class="nav-label">À prospecter</span>
-      <span class="nav-badge" style="${getApporteursRappelsDuJour().length>0?'background:var(--pa);color:#fff;border:none':''}">
-        ${(state.apporteurs||[]).filter(function(a){return !a.actif}).length||''}
+      <span class="nav-badge" style="${(state.apporteurs||[]).filter(function(a){return !a.statut||a.statut==='prospecter'}).length>0?'background:var(--p5);color:#fff;border:none':''}">
+        ${(state.apporteurs||[]).filter(function(a){return !a.statut||a.statut==='prospecter'}).length||''}
+      </span>
+    </div>
+    <div class="nav-item ${state.currentView==='apporteurs_contactes'?'active':''}" style="--phase-color:var(--p4)" onclick="setView('apporteurs_contactes')">
+      <span>📞</span><span class="nav-label">Contactés</span>
+      <span class="nav-badge" style="${(state.apporteurs||[]).filter(function(a){return a.statut==='contacte'}).length>0?'background:var(--p4);color:#fff;border:none':''}">
+        ${(state.apporteurs||[]).filter(function(a){return a.statut==='contacte'}).length||''}
       </span>
     </div>
     <div class="nav-item ${state.currentView==='apporteurs_actifs'?'active':''}" style="--phase-color:var(--p2)" onclick="setView('apporteurs_actifs')">
       <span>🤝</span><span class="nav-label">Apporteurs Actifs</span>
-      <span class="nav-badge" style="${(state.apporteurs||[]).filter(function(a){return a.actif}).length>0?'background:var(--p2);color:#fff;border:none':''}">
-        ${(state.apporteurs||[]).filter(function(a){return a.actif}).length||''}
+      <span class="nav-badge" style="${(state.apporteurs||[]).filter(function(a){return a.actif||a.statut==='actif'}).length>0?'background:var(--p2);color:#fff;border:none':''}">
+        ${(state.apporteurs||[]).filter(function(a){return a.actif||a.statut==='actif'}).length||''}
+      </span>
+    </div>
+    <div class="nav-item ${state.currentView==='rappels_apporteurs'?'active':''}" style="--phase-color:var(--pa)" onclick="setView('rappels_apporteurs')">
+      <span>🔔</span><span class="nav-label">Rappels Apporteurs</span>
+      <span class="nav-badge" style="${(function(){ var today=new Date().toISOString().split('T')[0]; var n=getRappelsApporteursDuJour().filter(function(r){return r.date<=today;}).length; return n>0?'background:var(--pa);color:#fff;border:none':''; })()}">
+        ${(function(){ var today=new Date().toISOString().split('T')[0]; return getRappelsApporteursDuJour().filter(function(r){return r.date<=today;}).length||''; })()}
       </span>
     </div>
     <div class="sidebar-section">Navigation</div>
@@ -1851,6 +2633,10 @@ function renderMain() {
     mc.appendChild(renderApporteurs());
   } else if (state.currentView === 'apporteurs_actifs') {
     mc.appendChild(renderApporteursActifs());
+  } else if (state.currentView === 'apporteurs_contactes') {
+    mc.appendChild(renderApporteursContactes());
+  } else if (state.currentView === 'rappels_apporteurs') {
+    mc.appendChild(renderRappelsApporteurs());
   } else {
     const phase = PHASES.find(p => p.key === state.currentView);
     if (phase) mc.appendChild(renderPhaseView(phase));
@@ -2296,7 +3082,7 @@ function getAllRelanceItems() {
   const today = new Date(); today.setHours(0,0,0,0);
 
   state.dossiers.forEach(d => {
-    if (d.phase === 7) return;
+    if (d.phase >= 8) return;
 
     // Relance banques (P3) — J+7 après dateInterro
     if (d.phase === 2 && d.dateInterro) {
@@ -2374,6 +3160,21 @@ function renderAgenda() {
   const renderItem = (item) => {
     const d = item.dossier;
     const cls = item.urgence;
+    // Rappel planifié - affichage simplifié
+    if (item.type === 'rappel') {
+      const overdue = item.urgence === 'urgent';
+      return `<div style="background:var(--surface);border:1px solid ${overdue?'var(--pa-light)':'var(--p4-light)'};border-left:4px solid ${overdue?'var(--pa)':'var(--p4)'};border-radius:10px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">${d.prenom} ${d.nom} <span style="font-size:11px;font-weight:600;color:${overdue?'var(--pa)':'var(--p4)'}">${overdue ? '⚠️ En retard' : '📅 Prévu le ' + new Date(item.dateRef).toLocaleDateString('fr-FR')}</span></div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:3px">🔔 ${item.label}</div>
+          ${d.telephone ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px">${d.telephone}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${d.telephone ? `<a href="tel:${d.telephone.replace(/\s/g,'')}" style="display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:6px;border:1px solid var(--p2-light);background:var(--p2-bg);color:var(--p2);font-size:12px;font-weight:600;text-decoration:none">📞 Appeler</a>` : ''}
+          <button onclick="marquerRappelDossierFaitAgenda('${d.id}','${item.rid}')" style="padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer">✓ Traité</button>
+        </div>
+      </div>`;
+    }
     const smsHref = item.type === 'banque' ? buildSmsRelanceBanque(d) : item.type === 'rdv' ? buildSmsRelanceRdv(d) : buildSmsLink(d);
     const relances = (d.relances||[]).filter(r => r.type === item.type);
     const relancesBadge = relances.length > 0
@@ -2397,7 +3198,7 @@ function renderAgenda() {
           <div style="flex:1">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
               <span style="font-size:13px;font-weight:700;color:var(--text)">${d.prenom} ${d.nom}</span>
-              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);background:var(--surface2);padding:2px 6px;border-radius:3px">${d.id}</span>
+              <span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text-dim);background:var(--surface2);padding:2px 6px;border-radius:3px">${d.id}</span>
               <span style="font-size:11px;color:${cls==='urgent'?'var(--pa)':'var(--p4)'};font-weight:600">${item.label}</span>
             </div>
             <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">
@@ -3074,6 +3875,14 @@ function handleTraiteClick(e) {
 }
 
 
+
+function marquerRappelDossierFaitAgenda(did, rid) {
+  const d = state.dossiers.find(x => x.id === did);
+  if (!d) return;
+  const r = (d.rappelsDossier||[]).find(x => x.id === rid);
+  if (r) { r.fait = true; saveState(); render(); toast('✅ Rappel traité', 'success'); }
+}
+
 function marquerRappelDossierFaitRD(btn) {
   var did = btn.getAttribute('data-did');
   var rid = btn.getAttribute('data-rid');
@@ -3375,6 +4184,131 @@ function reculerPhase(id) {
   toast('← ' + d.prenom + ' ' + d.nom + ' ramené en ' + prevPhase.short, 'info');
 }
 
+
+// ─── RAPPELS APPORTEURS ───────────────────────────────────────────────────────
+function getRappelsApporteursDuJour() {
+  var today = new Date().toISOString().split('T')[0];
+  var items = [];
+  (state.apporteurs||[]).forEach(function(ap) {
+    // Rappel global
+    if (ap.prochainRappel && !ap.prochainRappelFait) {
+      items.push({ ap:ap, key:'rappel_global', label:'📞 Rappel planifié', date:ap.prochainRappel });
+    }
+    // Actions suivi avec rappel
+    ACTIONS_APPORTEUR.forEach(function(a) {
+      var r = (ap.actionsRappel||{})[a.key];
+      if (r) items.push({ ap:ap, key:a.key, label:a.label, date:r });
+    });
+    // Rappels libres
+    (ap.rappelsLibres||[]).filter(function(r){ return !r.fait; }).forEach(function(r) {
+      items.push({ ap:ap, key:'libre_'+r.id, label:r.note, detail:r.detail||'', date:r.date, rid:r.id });
+    });
+  });
+  // Trier : aujourd'hui en premier, puis futur
+  items.sort(function(a,b){ return a.date > b.date ? 1 : -1; });
+  return items;
+}
+
+function renderRappelsApporteurs() {
+  var div = document.createElement('div');
+  var allItems = getRappelsApporteursDuJour();
+  var today = new Date().toISOString().split('T')[0];
+  var urgents = allItems.filter(function(i){ return i.date <= today; });
+  var aVenir  = allItems.filter(function(i){ return i.date > today; });
+
+  function buildApRow(item) {
+    var ap = item.ap;
+    var overdue  = item.date < today;
+    var isToday  = item.date === today;
+    var bg       = overdue ? 'var(--pa-bg)' : 'transparent';
+    var urgLabel = overdue ? '⚠️ En retard' : isToday ? '📅 Aujourd\'hui' : new Date(item.date).toLocaleDateString('fr-FR');
+    var urgColor = overdue ? 'var(--pa)' : isToday ? 'var(--p4)' : 'var(--p1)';
+    var tel_btn  = ap.telephone ? '<a href="tel:' + ap.telephone.replace(/\s/g,'') + '" style="display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:6px;border:1px solid var(--p2-light);background:var(--p2-bg);color:var(--p2);font-size:12px;font-weight:600;text-decoration:none">📞 Appeler</a>' : '';
+    var mail_btn = ap.email ? '<a href="mailto:' + ap.email + '" style="display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:6px;border:1px solid var(--p1-light);background:var(--p1-bg);color:var(--p1);font-size:12px;font-weight:600;text-decoration:none">📧 Mail</a>' : '';
+    var traite_btn = '<button data-apid="' + ap.id + '" data-key="' + item.key + '" data-rid="' + (item.rid||'') + '" onclick="marquerRappelApporteurTraite(this)" style="padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer">✓ Traité</button>';
+    return '<div style="display:flex;align-items:flex-start;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);background:' + bg + '">'
+      + '<div style="flex:1">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">'
+      + '<span style="font-size:13px;font-weight:700;color:var(--text)">' + ap.nom + '</span>'
+      + '<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:var(--p4-bg);color:var(--p4);border:1px solid var(--p4-light)">' + (ap.type||'Apporteur') + '</span>'
+      + '<span style="font-size:11px;font-weight:700;color:' + urgColor + '">' + urgLabel + '</span>'
+      + '</div>'
+      + '<div style="font-size:12px;color:var(--text-muted)">' + item.label + (ap.telephone?' · '+ap.telephone:'') + '</div>'
+      + (item.detail ? '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;font-style:italic">💬 ' + item.detail + '</div>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">' + tel_btn + mail_btn + traite_btn + '</div>'
+      + '</div>';
+  }
+
+  var sectionUrgent = urgents.length
+    ? '<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;color:var(--pa);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">🔴 Aujourd\'hui & en retard (' + urgents.length + ')</div>'
+      + '<div style="background:var(--surface);border:1px solid var(--pa-light);border-radius:10px;overflow:hidden">' + urgents.map(buildApRow).join('') + '</div></div>'
+    : '<div style="background:var(--p2-bg);border:1px solid var(--p2-light);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--p2);font-weight:600">✅ Aucun rappel urgent aujourd\'hui !</div>';
+
+  var sectionAVenir = aVenir.length
+    ? '<div><div style="font-size:11px;font-weight:700;color:var(--p1);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📅 À venir (' + aVenir.length + ')</div>'
+      + '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">' + aVenir.map(buildApRow).join('') + '</div></div>'
+    : '';
+
+  // Bouton nouveau rappel
+  var newBtn = '<div style="margin-bottom:16px"><button onclick="openNouveauRappelApporteur()" style="padding:9px 18px;border-radius:8px;border:none;background:var(--p4);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif">+ Nouveau rappel apporteur</button></div>';
+
+  div.innerHTML = '<h1 style="font-size:22px;font-weight:700;margin-bottom:6px;color:var(--text)">🔔 Rappels Apporteurs</h1>'
+    + '<p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">' + urgents.length + ' urgent' + (urgents.length>1?'s':'') + ' · ' + aVenir.length + ' à venir</p>'
+    + newBtn + sectionUrgent + sectionAVenir;
+  return div;
+}
+
+function marquerRappelApporteurTraite(btn) {
+  var apid = btn.getAttribute('data-apid');
+  var key  = btn.getAttribute('data-key');
+  var rid  = btn.getAttribute('data-rid');
+  var ap   = (state.apporteurs||[]).find(function(x){ return x.id===apid; });
+  if (!ap) return;
+  if (key === 'rappel_global') {
+    ap.prochainRappelFait = true;
+    delete ap.prochainRappel;
+  } else if (key.startsWith('libre_')) {
+    ap.rappelsLibres = (ap.rappelsLibres||[]).map(function(r){ return r.id===rid ? Object.assign({},r,{fait:true}) : r; });
+  } else {
+    ap.actionsRappel = ap.actionsRappel || {};
+    delete ap.actionsRappel[key];
+  }
+  saveState(); render();
+  toast('✅ Rappel apporteur traité', 'success');
+}
+
+// Rappels libres sur fiche apporteur (comme les dossiers)
+function openNouveauRappelApporteur(apid) {
+  if (apid) state.pendingRappelAp = apid;
+  // Fill select with apporteurs
+  var sel = document.getElementById('rap-apporteur');
+  if (sel) {
+    sel.innerHTML = (state.apporteurs||[]).map(function(ap){
+      return '<option value="' + ap.id + '"' + (ap.id===state.pendingRappelAp?' selected':'') + '>' + ap.nom + '</option>';
+    }).join('');
+  }
+  document.getElementById('rap-sujet').value = '';
+  document.getElementById('rap-detail').value = '';
+  document.getElementById('rap-date').value = '';
+  document.getElementById('modal-rap-apporteur').classList.add('open');
+}
+
+function saveRappelApporteur() {
+  var apid   = document.getElementById('rap-apporteur').value;
+  var sujet  = document.getElementById('rap-sujet').value.trim();
+  var detail = document.getElementById('rap-detail').value.trim();
+  var date   = document.getElementById('rap-date').value;
+  if (!apid || !sujet || !date) { toast('Apporteur, sujet et date obligatoires', 'error'); return; }
+  var ap = (state.apporteurs||[]).find(function(x){ return x.id===apid; });
+  if (!ap) return;
+  ap.rappelsLibres = ap.rappelsLibres || [];
+  ap.rappelsLibres.push({ id:'RAP-'+Date.now(), note:sujet, detail:detail, date:date, fait:false });
+  saveState(); render();
+  document.getElementById('modal-rap-apporteur').classList.remove('open');
+  toast('🔔 Rappel apporteur enregistré le ' + new Date(date).toLocaleDateString('fr-FR'), 'success');
+}
+
 // ─── BUILD ACTIONS BLOCK ─────────────────────────────────────────────────────
 function buildActionsBlock(dossier) {
   var today = new Date().toISOString().split('T')[0];
@@ -3422,7 +4356,7 @@ let pendingApporteurAction = null;
 
 function renderApporteurs() {
   const div = document.createElement('div');
-  const apporteurs = (state.apporteurs || []).filter(function(a){ return !a.actif; });
+  const apporteurs = (state.apporteurs || []).filter(function(a){ return !a.actif && (!a.statut || a.statut === 'prospecter'); });
   const today = new Date().toISOString().split('T')[0];
   const rappelsUrgents = apporteurs.filter(function(a) {
     return a.prochainRappel && a.prochainRappel <= today;
@@ -3501,12 +4435,18 @@ function buildApporteurCard(ap) {
   }
 
   var html = '<div class="apporteur-card" id="apcard-' + ap.id + '">';
+  var statut = ap.actif ? 'actif' : (ap.statut || 'prospecter');
+  var statutLabel = statut === 'actif' ? '🤝 Actif' : statut === 'contacte' ? '📞 Contacté' : '🎯 À prospecter';
+  var statutClass = statut === 'actif' ? 'statut-actif' : statut === 'contacte' ? 'statut-contacte' : 'statut-prospecter';
   html += '<div class="apporteur-header">';
   html += '<div><div class="apporteur-name">' + ap.nom + '</div>';
   html += '<div class="apporteur-role">' + (ap.societe||'') + (ap.role ? ' · ' + ap.role : '') + '</div></div>';
+  html += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">';
+  html += '<span class="statut-badge ' + statutClass + '">' + statutLabel + '</span>';
   if (ap.prochainRappel && ap.prochainRappel <= today) {
     html += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;background:var(--pa-bg);color:var(--pa);border:1px solid var(--pa-light)">🔔 Rappel</span>';
   }
+  html += '</div>';
   html += '</div>';
   html += '<div class="apporteur-body">';
   html += '<div class="apporteur-info">';
@@ -3524,9 +4464,21 @@ function buildApporteurCard(ap) {
   if (ap.telephone) html += '<a href="tel:' + ap.telephone.replace(/\s/g,'') + '" class="btn btn-ghost btn-sm">📞 Appeler</a>';
   if (ap.email)     html += '<a href="mailto:' + ap.email + '" class="btn btn-ghost btn-sm">📧 Email</a>';
   html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApRappel(event)">⏰ Rappel</button>';
-  html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApEdit(event)">✏️ Modifier</button>';
-  html += '<button class="btn btn-sm" style="background:var(--p2-bg);color:var(--p2);border:1px solid var(--p2-light);font-weight:700" data-apid="' + ap.id + '" onclick="handleApGagne(event)">🏆 Gagné !</button>';
+  html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApRappelLibre(event)">📝 Rappel libre</button>';
+  html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApEdit(event)">✏️</button>';
+  // Bouton de progression selon le statut
+  var st = ap.actif ? 'actif' : (ap.statut || 'prospecter');
+  if (st === 'prospecter') {
+    html += '<button class="btn-statut" style="background:var(--p4-bg);color:var(--p4);border:1px solid var(--p4-light)" data-apid="' + ap.id + '" onclick="handleApAvancer(event)">📞 Contacté →</button>';
+  } else if (st === 'contacte') {
+    html += '<button class="btn-statut" style="background:var(--p2-bg);color:var(--p2);border:1px solid var(--p2-light)" data-apid="' + ap.id + '" onclick="handleApGagne(event)">🤝 Actif →</button>';
+    html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApReculer(event)" title="Retour À prospecter">←</button>';
+  } else if (st === 'actif') {
+    html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApReculer(event)" title="Retour Contacté">← Retour</button>';
+  }
   html += '<button class="btn btn-ghost btn-sm" style="color:var(--pa)" data-apid="' + ap.id + '" onclick="handleApDelete(event)">🗑</button>';
+  html += buildRappelsApporteurBlock(ap);
+  html += buildNotesApporteurBlock(ap);
   html += '</div></div>';
   return html;
 }
@@ -3685,18 +4637,19 @@ function handleApGagne(e) {
   var ap = (state.apporteurs||[]).find(function(x){ return x.id===id; });
   if (!ap) return;
   if (!confirm('Passer "' + ap.nom + '" en Apporteur Actif ?')) return;
-  ap.actif = true;
+  ap.actif  = true;
+  ap.statut = 'actif';
   ap.dateGain = new Date().toISOString().split('T')[0];
-  ap.dossiers = ap.dossiers || [];
+  ap.dossiers    = ap.dossiers    || [];
   ap.commissions = ap.commissions || [];
   saveState(); render();
-  toast('🏆 ' + ap.nom + ' est maintenant un Apporteur Actif !', 'success');
+  toast('🤝 ' + ap.nom + ' est maintenant un Apporteur Actif !', 'success');
   setView('apporteurs_actifs');
 }
 
 function renderApporteursActifs() {
   var div = document.createElement('div');
-  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif; });
+  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif || a.statut==='actif'; });
   var totalComm = 0;
   actifs.forEach(function(a){ (a.commissions||[]).forEach(function(c){ totalComm += parseFloat(c.montant)||0; }); });
 
@@ -3832,7 +4785,7 @@ function deleteCommission(btn) {
 function filterApporteursActifs() {
   var searchEl = document.getElementById('ap-actifs-search');
   var q = searchEl ? searchEl.value.toLowerCase().trim() : '';
-  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif; });
+  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif || a.statut==='actif'; });
   var filtered = q ? actifs.filter(function(a){
     return (a.nom+' '+(a.societe||'')+' '+(a.type||'')+' '+(a.telephone||'')).toLowerCase().includes(q);
   }) : actifs;
@@ -3852,7 +4805,196 @@ function handleAddDossierAp(e) { openAddDossierApporteur(e.currentTarget.getAttr
 function handleAddCommAp(e)    { openAddCommission(e.currentTarget.getAttribute('data-apid')); }
 function handleApEditActif(e)  { openEditApporteur(e.currentTarget.getAttribute('data-apid')); }
 
+
+
+// ─── NOTES & RAPPELS APPORTEUR ────────────────────────────────────────────────
+function buildNotesApporteurBlock(ap) {
+  var notes = ap.notesLibres || [];
+  var histHTML = '';
+  if (notes.length) {
+    histHTML = '<div style="margin-top:10px">'
+      + '<div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Historique</div>'
+      + notes.slice().reverse().map(function(n) {
+          return '<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">'
+            + '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text-dim)">' + n.date + ' ' + n.heure + '</span>'
+            + '</div>'
+            + '<div style="color:var(--text-muted)">' + n.texte.replace(/\n/g,'<br>') + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+  return '<div class="notes-block">'
+    + '<div class="notes-header"><span>📝 Notes (' + notes.length + ')</span></div>'
+    + '<div class="notes-body">'
+    + '<textarea class="notes-textarea" id="ap-note-input-' + ap.id + '" placeholder="Écrire une note sur cet apporteur..."></textarea>'
+    + '<button class="notes-save-btn" data-apid="' + ap.id + '" onclick="handleSaveNoteAp(event)">✓ Enregistrer</button>'
+    + histHTML
+    + '</div>'
+    + '</div>';
+}
+
+
+function handleSaveNoteAp(e) {
+  saveNoteApporteur(e.currentTarget.getAttribute('data-apid'));
+}
+
+function saveNoteApporteur(apid) {
+  var ap = (state.apporteurs||[]).find(function(x){ return x.id===apid; });
+  if (!ap) return;
+  var el = document.getElementById('ap-note-input-' + apid);
+  if (!el || !el.value.trim()) { toast('La note est vide', 'error'); return; }
+  ap.notesLibres = ap.notesLibres || [];
+  var now = new Date();
+  ap.notesLibres.push({
+    date:  now.toLocaleDateString('fr-FR'),
+    heure: now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+    texte: el.value.trim(),
+  });
+  saveState();
+  el.value = '';
+  render();
+  toast('📝 Note enregistrée', 'success');
+}
+
+function buildRappelsApporteurBlock(ap) {
+  var rappels = (ap.rappelsLibres||[]).filter(function(r){ return !r.fait; });
+  var today = new Date().toISOString().split('T')[0];
+  var urgentCount = rappels.filter(function(r){ return r.date <= today; }).length;
+
+  var suggestions = ['Appeler pour prise de contact', 'Envoyer plaquette CAFPI', 'Relancer après premier contact', 'Vérifier si nouveau client à confier', 'RDV de présentation', 'Remercier pour client apporté'];
+
+  var suggHTML = suggestions.map(function(s){
+    return '<span class="rappel-suggestion" data-apid="' + ap.id + '" data-txt="' + s + '" onclick="prefillRappelAp(this)">' + s + '</span>';
+  }).join('');
+
+  var listHTML = rappels.sort(function(a,b){ return a.date>b.date?1:-1; }).map(function(r){
+    var cls   = r.date < today ? 'past' : r.date === today ? 'today' : 'future';
+    var label = r.date === today ? '🔔 Aujourd\'hui' : r.date < today ? '⚠️ ' + new Date(r.date).toLocaleDateString('fr-FR') : new Date(r.date).toLocaleDateString('fr-FR');
+    return '<div class="rappel-list-item" style="flex-direction:column;align-items:flex-start;gap:3px">'
+      + '<div style="display:flex;align-items:center;gap:8px;width:100%">'
+      + '<span class="rappel-list-date ' + cls + '">' + label + '</span>'
+      + '<span class="rappel-list-text" style="font-weight:600;color:var(--text)">' + r.note + '</span>'
+      + '<button style="margin-left:auto;font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:none;cursor:pointer;color:var(--p2)" data-apid="' + ap.id + '" data-rid="' + r.id + '" onclick="marquerRappelApFait(this)">✓</button>'
+      + '<button style="font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:none;cursor:pointer;color:var(--pa)" data-apid="' + ap.id + '" data-rid="' + r.id + '" onclick="supprimerRappelAp(this)">×</button>'
+      + '</div>'
+      + (r.detail ? '<div style="font-size:11px;color:var(--text-muted);padding-left:4px;font-style:italic">💬 ' + r.detail + '</div>' : '')
+      + '</div>';
+  }).join('');
+
+  return '<div class="rappel-dossier-block">'
+    + '<div class="rappel-dossier-header">'
+    + '<span>🔔 Rappels' + (urgentCount > 0 ? ' — <span style="color:var(--pa)">' + urgentCount + ' aujourd\'hui</span>' : '') + '</span>'
+    + '</div>'
+    + '<div class="rappel-dossier-body">'
+    + '<div style="margin-bottom:8px">' + suggHTML + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">'
+    + '<input type="text" id="ap-rappel-sujet-' + ap.id + '" class="notes-textarea" style="min-height:unset;height:34px" placeholder="Sujet du rappel...">'
+    + '<input type="date" id="ap-rappel-date-' + ap.id + '" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface2);color:var(--text);outline:none">'
+    + '</div>'
+    + '<div style="display:flex;gap:6px;margin-bottom:8px">'
+    + '<textarea id="ap-rappel-detail-' + ap.id + '" class="notes-textarea" style="min-height:55px;flex:1" placeholder="Détails — ce que tu dois lui demander ou dire..."></textarea>'
+    + '<button class="notes-save-btn" style="align-self:flex-end;white-space:nowrap" data-apid="' + ap.id + '" onclick="ajouterRappelAp(this.getAttribute(\'data-apid\'))">+ Rappel</button>'
+    + '</div>'
+    + (listHTML || '<div style="font-size:11px;color:var(--text-dim)">Aucun rappel planifié</div>')
+    + '</div>'
+    + '</div>';
+}
+
+function prefillRappelAp(el) {
+  var apid = el.getAttribute('data-apid');
+  var txt  = el.getAttribute('data-txt');
+  var inp  = document.getElementById('ap-rappel-sujet-' + apid);
+  if (inp) inp.value = txt;
+  var dat  = document.getElementById('ap-rappel-date-' + apid);
+  if (dat && !dat.value) {
+    var j7 = new Date(); j7.setDate(j7.getDate()+7);
+    dat.value = j7.toISOString().split('T')[0];
+  }
+}
+
+function ajouterRappelAp(apid) {
+  var ap = (state.apporteurs||[]).find(function(x){ return x.id===apid; });
+  if (!ap) return;
+  var sujet  = (document.getElementById('ap-rappel-sujet-' + apid)||{}).value||'';
+  var detail = (document.getElementById('ap-rappel-detail-' + apid)||{}).value||'';
+  var date   = (document.getElementById('ap-rappel-date-' + apid)||{}).value||'';
+  if (!sujet || !date) { toast('Sujet et date obligatoires', 'error'); return; }
+  ap.rappelsLibres = ap.rappelsLibres || [];
+  ap.rappelsLibres.push({ id:'RAP-'+Date.now(), note:sujet, detail:detail, date:date, fait:false });
+  saveState(); render();
+  toast('🔔 Rappel ajouté le ' + new Date(date).toLocaleDateString('fr-FR'), 'success');
+}
+
+function marquerRappelApFait(btn) {
+  var ap = (state.apporteurs||[]).find(function(x){ return x.id===btn.getAttribute('data-apid'); });
+  if (!ap) return;
+  var r = (ap.rappelsLibres||[]).find(function(x){ return x.id===btn.getAttribute('data-rid'); });
+  if (r) { r.fait = true; saveState(); render(); toast('✅ Rappel traité', 'success'); }
+}
+
+function supprimerRappelAp(btn) {
+  var ap = (state.apporteurs||[]).find(function(x){ return x.id===btn.getAttribute('data-apid'); });
+  if (!ap) return;
+  ap.rappelsLibres = (ap.rappelsLibres||[]).filter(function(x){ return x.id!==btn.getAttribute('data-rid'); });
+  saveState(); render();
+}
+
+// ─── STATUT APPORTEUR ─────────────────────────────────────────────────────────
+function handleApAvancer(e) {
+  var ap = (state.apporteurs||[]).find(function(x){ return x.id===e.currentTarget.getAttribute('data-apid'); });
+  if (!ap) return;
+  ap.statut = 'contacte';
+  ap.dateDernierContact = new Date().toISOString().split('T')[0];
+  saveState(); render();
+  setView('apporteurs_contactes');
+  toast('📞 ' + ap.nom + ' → Contacté', 'success');
+}
+
+function handleApReculer(e) {
+  var ap = (state.apporteurs||[]).find(function(x){ return x.id===e.currentTarget.getAttribute('data-apid'); });
+  if (!ap) return;
+  var current = ap.actif ? 'actif' : (ap.statut||'prospecter');
+  if (current === 'actif') { ap.actif = false; ap.statut = 'contacte'; setView('apporteurs_contactes'); }
+  else if (current === 'contacte') { ap.statut = 'prospecter'; setView('apporteurs'); }
+  saveState(); render();
+  toast('← ' + ap.nom + ' reculé', 'info');
+}
+
+function renderApporteursContactes() {
+  var div = document.createElement('div');
+  var apporteurs = (state.apporteurs||[]).filter(function(a){ return a.statut==='contacte' && !a.actif; });
+  var rappelsUrgents = apporteurs.filter(function(a){ return a.prochainRappel && a.prochainRappel <= new Date().toISOString().split('T')[0]; });
+
+  var filterHTML = buildApFiltres(apporteurs, 'apporteurs_contactes');
+  var cardsHTML = apporteurs.length
+    ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">' + buildApTypeFiltres(apporteurs) + '</div><div class="cards-grid" id="ap-contact-grid">' + apporteurs.map(buildApporteurCard).join('') + '</div>'
+    : '<div class="empty-state"><div class="empty-icon">📞</div><p>Aucun apporteur contacté — utilisez le bouton "📞 Contacté →" sur les fiches</p></div>';
+
+  div.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    + '<div><div style="font-size:22px;font-weight:700;color:var(--text)">📞 Apporteurs Contactés</div>'
+    + '<div style="font-size:13px;color:var(--text-muted);margin-top:3px">' + apporteurs.length + ' apporteur' + (apporteurs.length!==1?'s':'')
+    + (rappelsUrgents.length ? ' · <span style="color:var(--pa);font-weight:700">🔔 ' + rappelsUrgents.length + ' rappel(s) urgent(s)</span>' : '') + '</div></div>'
+    + '<button class="btn btn-primary" onclick="openNewApporteur()">+ Nouvel apporteur</button>'
+    + '</div>'
+    + '<input type="text" id="ap-contact-search" class="search-input" placeholder="🔍 Rechercher..." oninput="filterApporteursContactes()" style="width:100%;margin-bottom:14px">'
+    + cardsHTML;
+  return div;
+}
+
+function filterApporteursContactes() {
+  var q = (document.getElementById('ap-contact-search')||{}).value||'';
+  var all = (state.apporteurs||[]).filter(function(a){ return a.statut==='contacte'&&!a.actif; });
+  var filtered = q ? all.filter(function(a){ return (a.nom+' '+(a.societe||'')+' '+(a.type||'')).toLowerCase().includes(q.toLowerCase()); }) : all;
+  var grid = document.getElementById('ap-contact-grid');
+  if (grid) grid.innerHTML = filtered.length ? filtered.map(buildApporteurCard).join('') : '<div class="empty-state"><div class="empty-icon">🔍</div><p>Aucun résultat</p></div>';
+}
+
+function buildApFiltres(list, view) { return ''; } // placeholder
+function buildApTypeFiltres(list) { return ''; } // placeholder
+
 function handleApRappel(e) { openRappelApporteur(e.currentTarget.getAttribute('data-apid')); }
+function handleApRappelLibre(e) { openNouveauRappelApporteur(e.currentTarget.getAttribute('data-apid')); }
 function handleApEdit(e)   { openEditApporteur(e.currentTarget.getAttribute('data-apid')); }
 function handleApDelete(e) { deleteApporteur(e.currentTarget.getAttribute('data-apid')); }
 
