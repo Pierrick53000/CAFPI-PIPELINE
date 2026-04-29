@@ -3133,6 +3133,25 @@ function getAllRelanceItems() {
     }
   });
 
+  // ── Rappels planifiés sur les dossiers ──
+  const todayStr = new Date().toISOString().split('T')[0];
+  state.dossiers.filter(d => d.phase < 8).forEach(d => {
+    (d.rappelsDossier||[]).filter(r => !r.fait).forEach(r => {
+      const dateR = new Date(r.date); dateR.setHours(0,0,0,0);
+      const now3  = new Date(); now3.setHours(0,0,0,0);
+      const jours = Math.round((now3 - dateR) / 86400000);
+      items.push({
+        type: 'rappel',
+        dossier: d,
+        label: r.note + (r.detail ? ' — ' + r.detail : ''),
+        urgence: r.date <= todayStr ? 'urgent' : 'warning',
+        jours: jours,
+        dateRef: r.date,
+        rid: r.id,
+      });
+    });
+  });
+
   return items.sort((a,b) => {
     const score = r => r.urgence === 'urgent' ? 0 : 1;
     return score(a) - score(b) || b.jours - a.jours;
