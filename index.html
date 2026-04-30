@@ -1856,17 +1856,15 @@ function seedData() {
         "heure": "15:42",
         "phase": "1er Contact",
         "texte": "Mail de la cliente (Sophie) ce jour qui relance pour savoir les taux actuels. Réponse faite ce jour. A relancer pour accélérer recherche de bien"
+      },
+      {
+        "date": "30/04/2026",
+        "heure": "08:41",
+        "phase": "1er Contact",
+        "texte": "Nouvelle simulation faite ce jour avec 18 000 € d'apport contre 10 000 € annoncé en février. Un prêt boost de 15 000 € à 2,49 % + un prêt de 157 000 € environ à 3,80 % Achat possible à 170 000 € max."
       }
     ],
-    "rappelsDossier": [
-      {
-        "id": "R-1777383776225",
-        "note": "RELANCE Pour savopir où ils en sont",
-        "detail": "",
-        "date": "2026-05-04",
-        "fait": false
-      }
-    ]
+    "rappelsDossier": []
   },
   {
     "id": "DOS-010",
@@ -1909,10 +1907,57 @@ function seedData() {
         "fait": false
       }
     ]
+  },
+  {
+    "id": "DOS-011",
+    "phase": -1,
+    "nom": "LAMIRÉ",
+    "prenom": "Héloïse",
+    "telephone": "06 15 98 77 16",
+    "email": "heloiselamire@yahoo.fr",
+    "origine": "Autre",
+    "origineNom": "",
+    "originePrenom": "",
+    "origineEntreprise": "",
+    "origineTel": "",
+    "origineEmail": "",
+    "typeContact": "Compromis signé",
+    "montantBienEstime": "239900",
+    "apport": "135000",
+    "revenus": "2000",
+    "dateR1": "2026-02-10",
+    "resultatR1": "Qualifié",
+    "notesR1": "",
+    "coNom": "",
+    "coPrenom": "",
+    "coTelephone": "",
+    "coEmail": "",
+    "history": [
+      {
+        "date": "2026-02-10",
+        "from": -1,
+        "to": 0,
+        "note": "Création du dossier"
+      }
+    ],
+    "rappelsDossier": [
+      {
+        "id": "R-1777533725685",
+        "note": "Fixer RDV R1",
+        "detail": "",
+        "date": "2026-05-07",
+        "fait": true
+      }
+    ],
+    "gestionnaire": "",
+    "actionsLog": {
+      "sms": "30/04/2026"
+    },
+    "actionsRappel": {}
   }
 ];
   state.dossiers   = backup;
-  state.nextId     = 11;
+  state.nextId     = 12;
   state.apporteurs = [
   {
     "id": "AP-1777393936628",
@@ -1926,7 +1971,9 @@ function seedData() {
     "dept": "53",
     "notes": "Réseau L'Adresse",
     "actionsLog": {},
-    "actionsRappel": {}
+    "actionsRappel": {},
+    "statut": "prospecter",
+    "dateDernierContact": "2026-04-29"
   },
   {
     "id": "AP-1777393936629",
@@ -1939,8 +1986,14 @@ function seedData() {
     "email": "",
     "dept": "53",
     "notes": "Centre-ville Laval",
-    "actionsLog": {},
-    "actionsRappel": {}
+    "actionsLog": {
+      "email": "29/04/2026"
+    },
+    "actionsRappel": {
+      "email": "2026-04-30"
+    },
+    "statut": "prospecter",
+    "dateDernierContact": "2026-04-29"
   },
   {
     "id": "AP-1777393936630",
@@ -1954,7 +2007,9 @@ function seedData() {
     "dept": "53",
     "notes": "Syndic copropriété",
     "actionsLog": {},
-    "actionsRappel": {}
+    "actionsRappel": {},
+    "statut": "prospecter",
+    "dateDernierContact": "2026-04-29"
   },
   {
     "id": "AP-1777393936631",
@@ -2545,7 +2600,107 @@ function seedData() {
       "rappel_global": "29/04/2026"
     },
     "actionsRappel": {
-      "rappel_global": "2026-04-29"
+      "rappel_global": "2026-05-06"
+    },
+    "statut": "contacte",
+    "dateDernierContact": "2026-04-29"
+  },
+  {
+    "id": "AP-1777450243880",
+    "nom": "PLANCHARD Alexis",
+    "societe": "MPI - MON PROJET IMMOBILIER",
+    "role": "Aget Immobilier",
+    "telephone": "06 35 26 64 77",
+    "email": "alexis.planchard@mpi-immobilier.fr",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "Alexis ex Agent Immo Century 21",
+    "prochainRappel": "2026-05-06",
+    "actionsLog": {},
+    "actionsRappel": {},
+    "notesLibres": [
+      {
+        "date": "29/04/2026",
+        "heure": "10:11",
+        "texte": "A relancer"
+      }
+    ],
+    "rappelsLibres": [
+      {
+        "id": "RAP-1777451797591",
+        "note": "Relancer après premier contact",
+        "detail": "Suite mail envoyé aux 3 MPI, relancer",
+        "date": "2026-05-06",
+        "fait": true
+      }
+    ],
+    "statut": "contacte",
+    "dateDernierContact": "2026-04-29"
+  },
+  {
+    "id": "AP-1777452096907",
+    "nom": "MADIOT Charles",
+    "societe": "MPI - Mon Projet Immobilier",
+    "role": "Aget Immobilier",
+    "telephone": "06 29 42 08 40",
+    "email": "charles.madiot@mpi.immobilier.fr",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "Envoyer SMS",
+    "prochainRappel": "2026-05-06",
+    "actionsLog": {},
+    "actionsRappel": {},
+    "statut": "contacte",
+    "dateDernierContact": "2026-04-29"
+  },
+  {
+    "id": "AP-1777452187225",
+    "nom": "THERREAU Benjamin",
+    "societe": "MPI - Mon Projet Immobilier",
+    "role": "Agent Immobilier",
+    "telephone": "06 65 73 19 28",
+    "email": "benjamin.therreau@mpi-immobilier.fr",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "Envoyer SMS",
+    "prochainRappel": "2026-05-06",
+    "actionsLog": {},
+    "actionsRappel": {},
+    "statut": "contacte",
+    "dateDernierContact": "2026-04-29"
+  },
+  {
+    "id": "AP-1777452417902",
+    "nom": "ROUSSELET Alban",
+    "societe": "CENTURY 21 ",
+    "role": "Agent Immobilier",
+    "telephone": "06 42 93 67 63",
+    "email": "alban.rousselet@century21.fr",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "Envoyer SMS",
+    "prochainRappel": "2026-05-11",
+    "actionsLog": {},
+    "actionsRappel": {},
+    "statut": "contacte",
+    "dateDernierContact": "2026-04-29"
+  },
+  {
+    "id": "AP-1777452836449",
+    "nom": "PONT Éric",
+    "societe": "AVENIR IMMOBILIER",
+    "role": "Agent Immobilier ",
+    "telephone": "06 08 99 64 65",
+    "email": "ericpont.pro@gmail.com",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "",
+    "prochainRappel": "2026-05-11",
+    "actionsLog": {
+      "sms": "29/04/2026"
+    },
+    "actionsRappel": {
+      "sms": "2026-05-11"
     },
     "statut": "contacte",
     "dateDernierContact": "2026-04-29"
@@ -3360,8 +3515,10 @@ function startTransition(dossierId) {
   const d = state.dossiers.find(x => x.id === dossierId);
   if (!d) return;
 
-  const fromPhase = PHASES[d.phase];
-  const toPhase = PHASES[d.phase + 1];
+  const fromPhase = PHASES.find(p => p.id === d.phase) || PHASES[0];
+  const toPhase   = d.phase === -1
+    ? PHASES.find(p => p.id === 0)
+    : PHASES.find(p => p.id === d.phase + 1);
   state.pendingTransition = dossierId;
 
   // Banner
@@ -3408,8 +3565,10 @@ function confirmTransition() {
     toast(`Champ requis : ${missing.map(f=>f.label).join(', ')}`, 'error'); return;
   }
 
-  const fromPhase = PHASES[d.phase];
-  const toPhase = PHASES[d.phase + 1];
+  const fromPhase = PHASES.find(p => p.id === d.phase) || PHASES[0];
+  const toPhase   = d.phase === -1
+    ? PHASES.find(p => p.id === 0)
+    : PHASES.find(p => p.id === d.phase + 1);
 
   Object.assign(d, newData);
 
@@ -4156,9 +4315,6 @@ function ajouterRappelDossier(did) {
   d.rappelsDossier = d.rappelsDossier || [];
   d.rappelsDossier.push({ id:'R-'+Date.now(), note:sujet, detail:detail, date:date, fait:false });
   saveState();
-  // Refresh block
-  var block = document.querySelector('.rappel-dossier-block[data-did="'+did+'"]') ||
-    document.getElementById('card-'+did)?.querySelector('.rappel-dossier-block');
   render();
   toast('🔔 Rappel ajouté le ' + new Date(date).toLocaleDateString('fr-FR'), 'success');
 }
@@ -4327,6 +4483,8 @@ function saveRappelApporteur() {
   document.getElementById('modal-rap-apporteur').classList.remove('open');
   toast('🔔 Rappel apporteur enregistré le ' + new Date(date).toLocaleDateString('fr-FR'), 'success');
 }
+
+
 
 // ─── BUILD ACTIONS BLOCK ─────────────────────────────────────────────────────
 function buildActionsBlock(dossier) {
