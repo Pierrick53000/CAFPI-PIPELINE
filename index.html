@@ -686,19 +686,25 @@ body {
 .statut-contacte    { background: var(--p4-bg); color: var(--p4); border: 1px solid var(--p4-light); }
 .statut-actif       { background: var(--p2-bg); color: var(--p2); border: 1px solid var(--p2-light); }
 .btn-statut {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  border-radius: 7px;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   font-family: 'DM Sans', sans-serif;
   transition: all .15s;
+  width: 100%;
+  margin-top: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  letter-spacing: 0.3px;
 }
-.btn-statut:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-statut:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+.btn-statut:active { transform: translateY(0); }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -1910,7 +1916,7 @@ function seedData() {
   },
   {
     "id": "DOS-011",
-    "phase": -1,
+    "phase": 6,
     "nom": "LAMIRÉ",
     "prenom": "Héloïse",
     "telephone": "06 15 98 77 16",
@@ -1938,6 +1944,48 @@ function seedData() {
         "from": -1,
         "to": 0,
         "note": "Création du dossier"
+      },
+      {
+        "date": "2026-04-30",
+        "from": -1,
+        "to": 0,
+        "note": "Passage de 1er Contact à R1"
+      },
+      {
+        "date": "2026-04-30",
+        "from": 0,
+        "to": 1,
+        "note": "Passage de R1 à R2"
+      },
+      {
+        "date": "2026-04-30",
+        "from": 1,
+        "to": 2,
+        "note": "Passage de R2 à Mandat"
+      },
+      {
+        "date": "2026-04-30",
+        "from": 2,
+        "to": 3,
+        "note": "Passage de Mandat à Banques"
+      },
+      {
+        "date": "2026-04-30",
+        "from": 3,
+        "to": 4,
+        "note": "Passage de Banques à RDV Banque"
+      },
+      {
+        "date": "2026-04-30",
+        "from": 4,
+        "to": 5,
+        "note": "Passage de RDV Banque à Offres"
+      },
+      {
+        "date": "2026-04-30",
+        "from": 5,
+        "to": 6,
+        "note": "Passage de Offres à Notaire"
       }
     ],
     "rappelsDossier": [
@@ -1953,7 +2001,40 @@ function seedData() {
     "actionsLog": {
       "sms": "30/04/2026"
     },
-    "actionsRappel": {}
+    "actionsRappel": {},
+    "dateMandat": "2026-03-04",
+    "montantBien": "",
+    "montantPret": "",
+    "duree": "",
+    "honorairesMandat": "",
+    "notesMandat": "",
+    "dateInterro": "2026-03-11",
+    "banque1": "",
+    "taux1": "",
+    "banque2": "",
+    "taux2": "",
+    "banque3": "",
+    "taux3": "",
+    "banqueChoisie": "Crédit Mtutuel",
+    "tauxRetenu": "3,45",
+    "dateRdvBanque": "2026-03-28",
+    "heureRdv": "",
+    "lieuRdv": "Crédit Mutuel",
+    "conseillerBanque": "",
+    "notesRdv": "",
+    "dateOffres": "2026-03-28",
+    "taeg": "",
+    "assurance": "",
+    "notesOffres": "",
+    "notaire": "DUBOIS",
+    "dateSignaturePrevue": "2026-05-07",
+    "montantBienDefinitif": "250000",
+    "honorairesHT": "4000",
+    "notesNotaire": "Dubois",
+    "dateSignatureEffective": "2026-05-07",
+    "modePaiement": "Virement",
+    "dateEncaissement": "2026-05-07",
+    "notesHonoraires": "A 18h"
   }
 ];
   state.dossiers   = backup;
@@ -2704,6 +2785,75 @@ function seedData() {
     },
     "statut": "contacte",
     "dateDernierContact": "2026-04-29"
+  },
+  {
+    "id": "AP-1777553123414",
+    "nom": "DIVAY Florence",
+    "societe": "FONCIA",
+    "role": "Agent Immobilier",
+    "telephone": "06 32 09 27 45",
+    "email": "florence.divay@foncia.com",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "",
+    "actionsLog": {},
+    "actionsRappel": {},
+    "rappelsLibres": [
+      {
+        "id": "RAP-1777553934052",
+        "note": "Relance SMS",
+        "detail": "Toujours pas de clients transmis",
+        "date": "2026-05-26",
+        "fait": false
+      }
+    ],
+    "prochainRappelFait": true
+  },
+  {
+    "id": "AP-1777553232553",
+    "nom": "CELERIER Brivaël",
+    "societe": "OPTIMHOME",
+    "role": "Agent Immobilier",
+    "telephone": "07 64 37 74 57",
+    "email": "brivael.celerier@optimhome.com",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "",
+    "prochainRappel": "2026-04-30",
+    "actionsLog": {
+      "sms": "30/04/2026"
+    },
+    "actionsRappel": {
+      "sms": "2026-05-25"
+    }
+  },
+  {
+    "id": "AP-1777553325748",
+    "nom": "BRIAND Katia",
+    "societe": "MEG AGENCE",
+    "role": "Agent Immobilier",
+    "telephone": "06 81 55 04 30",
+    "email": "katia.briand@megagence.com",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "",
+    "prochainRappel": "2026-04-30",
+    "actionsLog": {},
+    "actionsRappel": {}
+  },
+  {
+    "id": "AP-1777553385628",
+    "nom": "LERAY Pierre",
+    "societe": "SQUARE HABITAT",
+    "role": "Agent Immobilier",
+    "telephone": "06 09 92 55 50",
+    "email": "",
+    "dept": "53",
+    "type": "Agence immobilière",
+    "notes": "",
+    "prochainRappel": "2026-04-30",
+    "actionsLog": {},
+    "actionsRappel": {}
   }
 ];
   saveState();
@@ -4646,17 +4796,19 @@ function buildApporteurCard(ap) {
   // Bouton de progression selon le statut
   var st = ap.actif ? 'actif' : (ap.statut || 'prospecter');
   if (st === 'prospecter') {
-    html += '<button class="btn-statut" style="background:var(--p4-bg);color:var(--p4);border:1px solid var(--p4-light)" data-apid="' + ap.id + '" onclick="handleApAvancer(event)">📞 Contacté →</button>';
+    html += '<button class="btn-statut" style="background:var(--p4);color:#fff;" data-apid="' + ap.id + '" onclick="handleApAvancer(event)">📞 Marquer comme Contacté →</button>';
   } else if (st === 'contacte') {
-    html += '<button class="btn-statut" style="background:var(--p2-bg);color:var(--p2);border:1px solid var(--p2-light)" data-apid="' + ap.id + '" onclick="handleApGagne(event)">🤝 Actif →</button>';
+    html += '<button class="btn-statut" style="background:var(--p2);color:#fff;" data-apid="' + ap.id + '" onclick="handleApGagne(event)">🤝 Passer en Apporteur Actif →</button>';
     html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApReculer(event)" title="Retour À prospecter">←</button>';
   } else if (st === 'actif') {
     html += '<button class="btn btn-ghost btn-sm" data-apid="' + ap.id + '" onclick="handleApReculer(event)" title="Retour Contacté">← Retour</button>';
   }
   html += '<button class="btn btn-ghost btn-sm" style="color:var(--pa)" data-apid="' + ap.id + '" onclick="handleApDelete(event)">🗑</button>';
+  html += '</div>'; // close apporteur-actions
   html += buildRappelsApporteurBlock(ap);
   html += buildNotesApporteurBlock(ap);
-  html += '</div></div>';
+  html += '</div>'; // close card body
+  html += '</div>'; // close card
   return html;
 }
 
