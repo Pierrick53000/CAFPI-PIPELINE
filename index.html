@@ -253,7 +253,7 @@ body {
 /* ─── DOSSIER CARDS ──────────────────────────────────────── */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 14px;
 }
 
@@ -3012,7 +3012,7 @@ function renderDashboard() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
       <div class="pipeline-title">Dossiers récents</div>
       <div class="cards-grid">
-        ${state.dossiers.slice(-4).reverse().map(d => renderCardHTML(d)).join('')}
+        ${state.dossiers.filter(d=>d.phase<8).sort((a,b)=>(a.nom||'').trim().localeCompare((b.nom||'').trim(),'fr')).slice(0,4).map(d => renderCardHTML(d)).join('')}
       </div>
     </div>
   `;
@@ -3026,7 +3026,9 @@ function renderPhaseView(phase) {
   div.style.setProperty('--phase-bg', phase.bg);
   div.style.setProperty('--phase-border', phase.border);
 
-  const dossiers = state.dossiers.filter(d => d.phase === phase.id);
+  const dossiers = state.dossiers
+    .filter(d => d.phase === phase.id)
+    .sort((a,b) => (a.nom||'').trim().localeCompare((b.nom||'').trim(), 'fr'));
   const subtitle = getPhaseSubtitle(phase.id);
 
   div.innerHTML = `
@@ -3828,7 +3830,9 @@ function collectFormData(fields, prefix) {
 function filterCards(phaseKey) {
   const q = document.getElementById(`search-${phaseKey}`).value.toLowerCase();
   const phase = PHASES.find(p => p.key === phaseKey);
-  const dossiers = state.dossiers.filter(d => d.phase === phase.id);
+  const dossiers = state.dossiers
+    .filter(d => d.phase === phase.id)
+    .sort((a,b) => (a.nom||'').trim().localeCompare((b.nom||'').trim(), 'fr'));
   const container = document.getElementById(`cards-${phaseKey}`);
   const filtered = q ? dossiers.filter(d =>
     (d.nom+d.prenom+d.telephone+d.email+d.id).toLowerCase().includes(q)
@@ -4424,11 +4428,13 @@ function buildRappelsDossierBlock(dossier) {
       + '</div>';
   }).join('');
 
+  var rappelOpen = urgentCount > 0 || rappels.length > 0;
   return '<div class="rappel-dossier-block">'
-    + '<div class="rappel-dossier-header">'
+    + '<div class="rappel-dossier-header" onclick="toggleBlock(this)" style="cursor:pointer;justify-content:space-between">'
     + '<span>🔔 Rappels' + (urgentCount > 0 ? ' — <span style="color:var(--pa)">' + urgentCount + ' aujourd\'hui</span>' : '') + '</span>'
+    + '<span style="font-size:10px;color:var(--text-dim)">' + (rappelOpen ? '▲' : '▼') + '</span>'
     + '</div>'
-    + '<div class="rappel-dossier-body">'
+    + '<div class="rappel-dossier-body" ' + (rappelOpen ? '' : 'style="display:none"') + '>'
     + '<div style="margin-bottom:8px">' + suggHTML + '</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">'
     + '<input type="text" id="rappel-sujet-' + dossier.id + '" class="notes-textarea" style="min-height:unset;height:34px" placeholder="Sujet du rappel...">'
@@ -4636,6 +4642,20 @@ function saveRappelApporteur() {
 
 
 
+
+function toggleBlock(header) {
+  var body = header.nextElementSibling;
+  if (!body) return;
+  var arrow = header.querySelector('span:last-child');
+  if (body.style.display === 'none') {
+    body.style.display = '';
+    if (arrow) arrow.textContent = '▲';
+  } else {
+    body.style.display = 'none';
+    if (arrow) arrow.textContent = '▼';
+  }
+}
+
 // ─── BUILD ACTIONS BLOCK ─────────────────────────────────────────────────────
 function buildActionsBlock(dossier) {
   var today = new Date().toISOString().split('T')[0];
@@ -4683,7 +4703,7 @@ let pendingApporteurAction = null;
 
 function renderApporteurs() {
   const div = document.createElement('div');
-  const apporteurs = (state.apporteurs || []).filter(function(a){ return !a.actif && (!a.statut || a.statut === 'prospecter'); });
+  const apporteurs = (state.apporteurs || []).filter(function(a){ return !a.actif && (!a.statut || a.statut === 'prospecter'); }).sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'', 'fr'); });
   const today = new Date().toISOString().split('T')[0];
   const rappelsUrgents = apporteurs.filter(function(a) {
     return a.prochainRappel && a.prochainRappel <= today;
@@ -4717,18 +4737,22 @@ function renderApporteurs() {
 
   div.innerHTML += filterHTML + '<input type="text" id="ap-search" class="search-input" placeholder="🔍 Rechercher..." oninput="filterApporteurs(event)" style="width:100%;margin-bottom:14px">'
     + '<div class="cards-grid" id="ap-cards-grid">' + cardsHTML + '</div>';
+  // Ensure sorted on load
+  setTimeout(function(){ filterApporteurs('Tous'); }, 0);
   return div;
 }
 
 function filterApporteurs(evtOrType) {
   var type = (typeof evtOrType === 'string') ? evtOrType : 'Tous';
-  var all = (state.apporteurs||[]).filter(function(a){ return !a.actif; });
+  var all = (state.apporteurs||[]).filter(function(a){ return !a.actif && (!a.statut || a.statut === 'prospecter'); });
   var searchEl = document.getElementById('ap-search');
   var q = searchEl ? searchEl.value.toLowerCase().trim() : '';
   var filtered = type==='Tous' ? all : all.filter(function(a){ return a.type===type; });
   if (q) filtered = filtered.filter(function(a){
     return (a.nom+' '+(a.societe||'')+' '+(a.ville||'')+' '+(a.type||'')+' '+(a.telephone||'')).toLowerCase().includes(q);
   });
+  // Tri alphabétique par nom
+  filtered = filtered.sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'', 'fr'); });
   var grid = document.getElementById('ap-cards-grid');
   if (!grid) return;
   grid.innerHTML = filtered.length ? filtered.map(buildApporteurCard).join('') : '<div class="empty-state"><div class="empty-icon">🔍</div><p>Aucun résultat</p></div>';
@@ -4978,7 +5002,7 @@ function handleApGagne(e) {
 
 function renderApporteursActifs() {
   var div = document.createElement('div');
-  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif || a.statut==='actif'; });
+  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif || a.statut==='actif'; }).sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'', 'fr'); });
   var totalComm = 0;
   actifs.forEach(function(a){ (a.commissions||[]).forEach(function(c){ totalComm += parseFloat(c.montant)||0; }); });
 
@@ -5114,7 +5138,7 @@ function deleteCommission(btn) {
 function filterApporteursActifs() {
   var searchEl = document.getElementById('ap-actifs-search');
   var q = searchEl ? searchEl.value.toLowerCase().trim() : '';
-  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif || a.statut==='actif'; });
+  var actifs = (state.apporteurs||[]).filter(function(a){ return a.actif || a.statut==='actif'; }).sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'', 'fr'); });
   var filtered = q ? actifs.filter(function(a){
     return (a.nom+' '+(a.societe||'')+' '+(a.type||'')+' '+(a.telephone||'')).toLowerCase().includes(q);
   }) : actifs;
@@ -5153,9 +5177,13 @@ function buildNotesApporteurBlock(ap) {
         }).join('')
       + '</div>';
   }
+  var notesOpen = notes.length > 0 ? '' : 'style="display:none"';
   return '<div class="notes-block">'
-    + '<div class="notes-header"><span>📝 Notes (' + notes.length + ')</span></div>'
-    + '<div class="notes-body">'
+    + '<div class="notes-header" onclick="toggleBlock(this)" style="cursor:pointer">'
+    + '<span>📝 Notes (' + notes.length + ')</span>'
+    + '<span style="font-size:10px;color:var(--text-dim)">' + (notes.length > 0 ? '▲' : '▼') + '</span>'
+    + '</div>'
+    + '<div class="notes-body" ' + (notes.length > 0 ? '' : 'style="display:none"') + '>'
     + '<textarea class="notes-textarea" id="ap-note-input-' + ap.id + '" placeholder="Écrire une note sur cet apporteur..."></textarea>'
     + '<button class="notes-save-btn" data-apid="' + ap.id + '" onclick="handleSaveNoteAp(event)">✓ Enregistrer</button>'
     + histHTML
@@ -5211,11 +5239,13 @@ function buildRappelsApporteurBlock(ap) {
       + '</div>';
   }).join('');
 
+  var rappelOpen = urgentCount > 0 || rappels.length > 0;
   return '<div class="rappel-dossier-block">'
-    + '<div class="rappel-dossier-header">'
+    + '<div class="rappel-dossier-header" onclick="toggleBlock(this)" style="cursor:pointer;justify-content:space-between">'
     + '<span>🔔 Rappels' + (urgentCount > 0 ? ' — <span style="color:var(--pa)">' + urgentCount + ' aujourd\'hui</span>' : '') + '</span>'
+    + '<span style="font-size:10px;color:var(--text-dim)">' + (rappelOpen ? '▲' : '▼') + '</span>'
     + '</div>'
-    + '<div class="rappel-dossier-body">'
+    + '<div class="rappel-dossier-body" ' + (rappelOpen ? '' : 'style="display:none"') + '>'
     + '<div style="margin-bottom:8px">' + suggHTML + '</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">'
     + '<input type="text" id="ap-rappel-sujet-' + ap.id + '" class="notes-textarea" style="min-height:unset;height:34px" placeholder="Sujet du rappel...">'
@@ -5292,7 +5322,7 @@ function handleApReculer(e) {
 
 function renderApporteursContactes() {
   var div = document.createElement('div');
-  var apporteurs = (state.apporteurs||[]).filter(function(a){ return a.statut==='contacte' && !a.actif; });
+  var apporteurs = (state.apporteurs||[]).filter(function(a){ return a.statut==='contacte' && !a.actif; }).sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'', 'fr'); });
   var rappelsUrgents = apporteurs.filter(function(a){ return a.prochainRappel && a.prochainRappel <= new Date().toISOString().split('T')[0]; });
 
   var filterHTML = buildApFiltres(apporteurs, 'apporteurs_contactes');
