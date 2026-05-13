@@ -706,6 +706,28 @@ body {
 .btn-statut:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
 .btn-statut:active { transform: translateY(0); }
 
+
+/* ── DOSSIERS CLÔTURÉS ── */
+.cloture-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--p6);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all .2s;
+}
+.cloture-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.cloture-honoraires {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--p6);
+  white-space: nowrap;
+}
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -1214,6 +1236,37 @@ function doGet(e) {
   </div>
 </div>
 
+
+<!-- MODAL CLOTURE -->
+<div class="modal-overlay" id="modal-cloture">
+  <div class="modal" style="width:460px">
+    <div class="modal-header">
+      <span class="modal-title" id="cloture-modal-title">✅ Clôturer le dossier</span>
+      <button class="modal-close" onclick="document.getElementById('modal-cloture').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Honoraires HT (€) *</label>
+          <input type="number" id="cloture-honoraires" placeholder="4000">
+        </div>
+        <div class="form-group">
+          <label>Date de clôture</label>
+          <input type="date" id="cloture-date">
+        </div>
+        <div class="form-group full">
+          <label>Notes (optionnel)</label>
+          <textarea id="cloture-notes" placeholder="Remarques sur le dossier..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-cloture').classList.remove('open')">Annuler</button>
+      <button class="btn btn-primary" style="background:var(--p6)" onclick="confirmerCloture()">✅ Confirmer la clôture</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOASTS -->
 <div class="toast-container" id="toast-container"></div>
 
@@ -1229,6 +1282,7 @@ const PHASES = [
   { id: 5, key: 'p5', name: 'Phase 5 – Offres',        short: 'Offres',      emoji: '🔷', color: 'var(--p5)', bg: 'var(--p5-bg)', border: 'var(--p5-light)' },
   { id: 6, key: 'p6', name: 'Phase 6 – Notaire',       short: 'Notaire',     emoji: '🟤', color: 'var(--p6)', bg: 'var(--p6-bg)', border: 'var(--p6-light)' },
   { id: 7, key: 'p7', name: 'Phase 7 – Honoraires',    short: 'Honoraires',  emoji: '💰', color: 'var(--p7)', bg: 'var(--p7-bg)', border: 'var(--p7-light)' },
+  { id: 9, key: 'pc', name: 'Dossiers clôturés', short: 'Clôturés', emoji: '✅', color: 'var(--p6)', bg: 'var(--p6-bg)', border: 'var(--p6-light)' },
   { id: 8, key: 'pa', name: 'Abandonnés',               short: 'Abandonnés',  emoji: '🚫', color: 'var(--pa)', bg: 'var(--pa-bg)', border: 'var(--pa-light)' },
 ];
 
@@ -2914,13 +2968,24 @@ function renderSidebar() {
       </span>
     </div>
     <div class="sidebar-section">Pipeline</div>
-    ${PHASES.map(p => `
+    ${PHASES.filter(p => p.id >= -1 && p.id <= 7).map(p => `
       <div class="nav-item ${state.currentView===p.key?'active':''}" style="--phase-color:${p.color}" onclick="setView('${p.key}')">
         <span>${p.emoji}</span>
         <span class="nav-label">${p.short}</span>
         <span class="nav-badge">${counts[p.id]||0}</span>
       </div>
     `).join('')}
+    <div class="sidebar-section">Finalisés</div>
+    <div class="nav-item ${state.currentView==='pc'?'active':''}" style="--phase-color:var(--p6)" onclick="setView('pc')">
+      <span>✅</span><span class="nav-label">Dossiers clôturés</span>
+      <span class="nav-badge" style="${state.dossiers.filter(d=>d.phase===9).length>0?'background:var(--p6);color:#fff;border:none':''}">
+        ${state.dossiers.filter(d=>d.phase===9).length||''}
+      </span>
+    </div>
+    <div class="nav-item ${state.currentView==='pa'?'active':''}" style="--phase-color:var(--pa)" onclick="setView('pa')">
+      <span>🚫</span><span class="nav-label">Abandonnés</span>
+      <span class="nav-badge">${counts[8]||0}</span>
+    </div>
   `;
 }
 
@@ -2940,6 +3005,8 @@ function renderMain() {
     mc.appendChild(renderApporteursActifs());
   } else if (state.currentView === 'apporteurs_contactes') {
     mc.appendChild(renderApporteursContactes());
+  } else if (state.currentView === 'pc') {
+    mc.appendChild(renderDossiersClotures());
   } else if (state.currentView === 'rappels_apporteurs') {
     mc.appendChild(renderRappelsApporteurs());
   } else {
@@ -3063,7 +3130,7 @@ function renderCardHTML(dossier) {
   const nextPhase = dossier.phase === -1
     ? PHASES.find(function(p){ return p.id === 0; })
     : dossier.phase < 6 ? PHASES.find(function(p){ return p.id === dossier.phase + 1; }) : null;
-  const isAbandonne = dossier.phase >= 8;
+  const isAbandonne = dossier.phase === 8 || dossier.phase === 9;
   const keyFields = getKeyFields(dossier);
 
   // Deadline badge for P5
@@ -3142,7 +3209,8 @@ function renderCardHTML(dossier) {
             ${nextPhase.emoji} Passer en ${nextPhase.short} →
           </button>
         ` : ''}
-        ${dossier.phase === 6 ? `<button class="btn btn-ghost btn-sm" style="flex:1;opacity:0.7">✅ Dossier clôturé</button>` : ''}
+        ${dossier.phase === 6 ? `<button class="btn btn-ghost btn-sm" style="flex:1;background:var(--p6);color:#fff;font-weight:700;border:none" onclick="openClotureDossier('${dossier.id}')">✅ Clôturer le dossier</button>` : ''}
+        ${dossier.phase === 9 ? `<button class="btn btn-ghost btn-sm" style="flex:1;opacity:0.6" disabled>✅ Clôturé</button>` : ''}
         ${!isAbandonne && dossier.phase > -1 ? `
           <button class="btn btn-ghost btn-sm" style="color:var(--text-muted)" onclick="reculerPhase('${dossier.id}')" title="Revenir à la phase précédente">
             ← ${PHASES.find(p => p.id === dossier.phase - 1)?.short || 'Retour'}
@@ -3442,7 +3510,7 @@ function getAllRelanceItems() {
 
   // ── Rappels planifiés sur les dossiers ──
   const todayStr = new Date().toISOString().split('T')[0];
-  state.dossiers.filter(d => d.phase < 8).forEach(d => {
+  state.dossiers.filter(d => d.phase < 8 && d.phase !== 9).forEach(d => {
     (d.rappelsDossier||[]).filter(r => !r.fait).forEach(r => {
       const dateR = new Date(r.date); dateR.setHours(0,0,0,0);
       const now3  = new Date(); now3.setHours(0,0,0,0);
@@ -4654,6 +4722,99 @@ function toggleBlock(header) {
     body.style.display = 'none';
     if (arrow) arrow.textContent = '▼';
   }
+}
+
+
+// ─── CLÔTURE DOSSIER ──────────────────────────────────────────────────────────
+function openClotureDossier(id) {
+  const d = state.dossiers.find(x => x.id === id);
+  if (!d) return;
+  state.pendingCloture = id;
+  document.getElementById('cloture-modal-title').textContent = '✅ Clôturer — ' + d.prenom + ' ' + d.nom;
+  document.getElementById('cloture-honoraires').value = d.honorairesHT || d.honorairesMandat || '';
+  document.getElementById('cloture-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('cloture-notes').value = '';
+  document.getElementById('modal-cloture').classList.add('open');
+}
+
+function confirmerCloture() {
+  const d = state.dossiers.find(x => x.id === state.pendingCloture);
+  if (!d) return;
+  const honoraires = parseFloat(document.getElementById('cloture-honoraires').value) || 0;
+  const date       = document.getElementById('cloture-date').value;
+  const notes      = document.getElementById('cloture-notes').value.trim();
+  if (!honoraires) { toast('Veuillez saisir le montant des honoraires', 'error'); return; }
+  d.phase            = 9;
+  d.honorairesFinaux = honoraires;
+  d.dateCloture      = date;
+  d.notesCloture     = notes;
+  d.history = d.history || [];
+  d.history.push({ date: date, from: 6, to: 9, note: 'Dossier clôturé — Honoraires : ' + honoraires.toLocaleString('fr-FR') + ' €' });
+  saveState();
+  document.getElementById('modal-cloture').classList.remove('open');
+  render();
+  toast('✅ Dossier clôturé — ' + honoraires.toLocaleString('fr-FR') + ' € d\'honoraires', 'success');
+  setView('pc');
+}
+
+function renderDossiersClotures() {
+  const div = document.createElement('div');
+  const clotures = state.dossiers
+    .filter(d => d.phase === 9)
+    .sort((a,b) => (b.dateCloture||'').localeCompare(a.dateCloture||''));
+  
+  const totalHonoraires = clotures.reduce((s,d) => s + (parseFloat(d.honorairesFinaux)||0), 0);
+  const totalBiens      = clotures.reduce((s,d) => s + (parseFloat(d.montantBien||d.montantBienEstime)||0), 0);
+
+  const statsHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px">
+      <div class="kpi-card" style="--phase-color:var(--p6)">
+        <div class="kpi-label">Dossiers clôturés</div>
+        <div class="kpi-value" style="--phase-color:var(--p6)">${clotures.length}</div>
+        <div class="kpi-sub">Total finalisés</div>
+      </div>
+      <div class="kpi-card" style="--phase-color:var(--p7)">
+        <div class="kpi-label">Honoraires encaissés</div>
+        <div class="kpi-value" style="--phase-color:var(--p7);font-size:20px">${totalHonoraires.toLocaleString('fr-FR')} €</div>
+        <div class="kpi-sub">Total HT</div>
+      </div>
+      <div class="kpi-card" style="--phase-color:var(--p2)">
+        <div class="kpi-label">Volume financement</div>
+        <div class="kpi-value" style="--phase-color:var(--p2);font-size:20px">${totalBiens.toLocaleString('fr-FR')} €</div>
+        <div class="kpi-sub">Montant biens financés</div>
+      </div>
+    </div>`;
+
+  const listHTML = clotures.length ? clotures.map(d => `
+    <div class="cloture-card">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span style="font-size:15px;font-weight:700;color:var(--text)">${d.prenom} ${d.nom}</span>
+          <span style="font-size:10px;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);padding:1px 7px;border-radius:4px">${d.id}</span>
+          ${d.dateCloture ? `<span style="font-size:11px;color:var(--text-muted)">Clôturé le ${new Date(d.dateCloture).toLocaleDateString('fr-FR')}</span>` : ''}
+        </div>
+        <div style="font-size:12px;color:var(--text-muted)">
+          ${d.montantBien||d.montantBienEstime ? 'Bien : ' + Number(d.montantBien||d.montantBienEstime).toLocaleString('fr-FR') + ' €' : ''}
+          ${d.tauxRetenu ? ' · Taux : ' + d.tauxRetenu + ' %' : ''}
+          ${d.banqueChoisie ? ' · ' + d.banqueChoisie : ''}
+        </div>
+        ${d.notesCloture ? `<div style="font-size:11px;color:var(--text-dim);margin-top:3px;font-style:italic">💬 ${d.notesCloture}</div>` : ''}
+      </div>
+      <div class="cloture-honoraires">${Number(d.honorairesFinaux||0).toLocaleString('fr-FR')} €</div>
+      <button onclick="openEdit('${d.id}')" style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:none;cursor:pointer;font-size:12px">✏️</button>
+    </div>
+  `).join('') : '<div class="empty-state"><div class="empty-icon">✅</div><p>Aucun dossier clôturé pour le moment</p></div>';
+
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:22px;font-weight:700;color:var(--text)">✅ Dossiers clôturés</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:3px">${clotures.length} dossier${clotures.length!==1?'s':''} finalisés</div>
+      </div>
+    </div>
+    ${statsHTML}
+    <div style="display:flex;flex-direction:column;gap:10px">${listHTML}</div>`;
+  return div;
 }
 
 // ─── BUILD ACTIONS BLOCK ─────────────────────────────────────────────────────
